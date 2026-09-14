@@ -6,7 +6,7 @@
 ## 2. Encoding spike (before any schema work)
 
 - [x] 2.1 Build throwaway Pydantic models covering an annotated `Decimal` (string plus pattern), a `date`, a `min 1` list and a discriminated union under a root object. Capture the request body the SDK sends for `messages.parse`, using an `httpx.MockTransport` (no API call). Verify by writing into design.md D6/D7 what the SDK transforms `oneOf`/discriminator, `pattern`, `format: date` and `minItems` into, and which constraints are stripped and validated client-side
-- [ ] 2.2 Make one real `claude-sonnet-5` call with the spike models on a tiny text prompt that must return `338650.00` and an ISO date. Verify the parsed `Decimal` equals `Decimal("338650.00")` exactly and is not a float, and that the union parses into the right branch; record the result (or the fallback taken) in design.md D6/D7
+- [x] 2.2 Make one real `claude-sonnet-5` call with the spike models on a tiny text prompt that must return `338650.00` and an ISO date. Verify the parsed `Decimal` equals `Decimal("338650.00")` exactly and is not a float, and that the union parses into the right branch; record the result (or the fallback taken) in design.md D6/D7
 
 ## 3. Domain verifications
 
@@ -42,11 +42,11 @@
 
 ## 8. Manual acceptance (real API; not part of pytest)
 
-- [ ] 8.1 Run the entry point on the spike Factura A; verify the outcome is extracted and total, issuer CUIT, customer CUIT, point of sale, invoice number and CAE match the PDF
-- [ ] 8.2 Run it on the nota de crédito from 3.3; verify the outcome is a failure with `unsupported_document_type`
-- [ ] 8.3 Run it on a one-page non-invoice PDF; verify the outcome is a failure with a reason, not an invoice
-- [ ] 8.4 Run it on the spike with `--max-tokens 64`; verify a `truncated` call failure is printed with tokens and cost and no traceback
-- [ ] 8.5 Replace the ESTIMATED table in design.md with the measured tokens, cost and latency from 8.1–8.4, labelled with date and model
+- [x] 8.1 Run the entry point on the spike Factura A; verify the outcome is extracted and total, issuer CUIT, customer CUIT, point of sale, invoice number and CAE match the PDF
+- [x] 8.2 Run it on the nota de crédito from 3.3; verify the outcome is a failure with `unsupported_document_type`
+- [x] 8.3 Run it on a one-page non-invoice PDF; verify the outcome is a failure with a reason, not an invoice
+- [x] 8.4 Run it on the spike with `--max-tokens 64`; verify a `truncated` call failure is printed with tokens and cost and no traceback
+- [x] 8.5 Replace the ESTIMATED table in design.md with the measured tokens, cost and latency from 8.1–8.4, labelled with date and model
 
 ## 9. Documentation follow-ups
 
@@ -54,4 +54,4 @@
 - [x] 9.2 Update PRD 02: mark OQ-2.1 resolved as (a), add notas de crédito/débito to the R2 negatives table with their own tag, add the `currency` ARS convention as an explicit exception in R3.1; verify by review against design D1 and D4
 - [x] 9.3 Update PRD 04: V3 with the WSFE formula (`net + non_taxed + exempt + vat + other_taxes = total`), new V2b line arithmetic check, and a note that V4's base per rate comes from items grouped by `vat_rate`; verify by review against design D2 and D3
 - [x] 9.4 Add to PRD 03 open questions the list-scoring rule for `vat_breakdown` and `other_taxes` (must enter the measurement change log before the baseline); verify the question appears there and in design.md Open Questions
-- [ ] 9.5 Run `pytest` with no API key and `git status` to confirm no `.env`, API key or generated PDF is committed
+- [x] 9.5 Run `pytest` with no API key and `git status` to confirm no `.env`, API key or generated PDF is committed

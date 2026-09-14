@@ -121,7 +121,10 @@ The rule: schema patterns constrain *encoding*, never *domain truth*.
   - Lists keep their description because the `$ref` sits inside `items`.
 - `date` is sent as `{"type": "string", "format": "date"}` and kept by the SDK.
 - `min_length=1` on a list is sent as `minItems: 1` and kept.
-- The real round-trip of `338650.00` is task 2.2.
+- **Real round-trip (task 2.2, 2026-09-14, `claude-sonnet-5`, `req_011Cf47vhrxCAawAo645HcX5`).** Text input printing Argentine-format amounts, sent through `ModelClient` with a one-value-enum discriminated union, `DecimalString`, `date` and a `minItems: 1` list.
+  - The API accepted the schema.
+  - The response parsed into the `extracted` branch, with total `Decimal('338650.00')` (exact, not a float), `date(2026, 8, 12)`, and line amounts converted from "150.000,00" to `150000.00`.
+  - Call metrics: 1,034 input tokens, 65 output tokens, `end_turn`, 3.1 s, $0.002718. No encoding fallback was needed.
 
 ### D8 · Enum values
 
@@ -218,14 +221,26 @@ The acceptance run uses two negatives:
 
 Rendered files stay in the gitignored `tools/generate_invoices/out/`. Unit tests never need PDFs, because they use the fake client. **Verified (task 3.3):** pyfepdf maps `tipo_cbte` to its title and code. `spike_factura_a.py --tipo-cbte 3` renders a nota de crédito A: title "Nota de Crédito", `COD.03`, everything else identical to the Factura A (same number, CAE and amounts). That makes it a hard negative that differs from the invoice only in its title and code.
 
-## Estimates (ESTIMATED, not measured; replaced by task 10 numbers)
+## Measured calls (tasks 2.2 and 8.1–8.4)
 
-| Metric | Estimate for the 1-page spike on `claude-sonnet-5` | Basis |
-|---|---|---|
-| Input tokens | 4,000–6,000 | ~1,500–3,000 text tokens per PDF page plus the page image, ~400 system prompt, plus schema overhead |
-| Output tokens | 1,500–4,000 | ~800–1,200 for the JSON with 3 items, plus adaptive thinking of unknown size |
-| Cost per document | $0.02–0.05 | $2 / $10 per MTok |
-| Latency | 10–30 s | adaptive thinking plus PDF processing; no measurement yet |
+Measured on 2026-09-14 with `claude-sonnet-5`, prompt `v1`, price table verified 2026-09-14. One call per document, so these are single observations, not distributions.
+
+| Task | Document | Outcome | Input tok | Output tok | Stop reason | Latency | Cost | Request ID |
+|---|---|---|---|---|---|---|---|---|
+| 8.1 | Spike Factura A (1 page) | extracted, identical to the hand-built fixture | 9,404 | 1,114 | `end_turn` | 15.3 s | $0.029948 | `req_011Cf47x2sydUtxHAbASk5DP` |
+| 8.2 | Spike nota de crédito A | failed: `unsupported_document_type` | 9,409 | 61 | `end_turn` | 3.2 s | $0.019428 | `req_011Cf47zE7TjLtX6sZrLPg3R` |
+| 8.3 | One-page meeting minutes (non-invoice) | failed: `not_an_invoice` | 8,894 | 66 | `end_turn` | 3.0 s | $0.018448 | `req_011Cf47zZfCaLXYo9kRQtn2L` |
+| 8.4 | Spike Factura A, `--max-tokens 64` | call failure: `truncated` | 9,404 | 64 | `max_tokens` | 2.9 s | $0.019448 | `req_011Cf47ztRKANcKzXnHeykUy` |
+| 2.2 | Short text, small spike schema | extracted | 1,034 | 65 | `end_turn` | 3.1 s | $0.002718 | `req_011Cf47vhrxCAawAo645HcX5` |
+
+Compared with the earlier estimates (input 4–6k, output 1.5–4k, $0.02–0.05, 10–30 s):
+
+- **Input is about double the estimate** (~9.4k tokens). The invoice and the meeting minutes, both one page, differ by only ~500 tokens. So most of the input is likely a per-call fixed prefix: system prompt, the ~14 KB result schema, and the API's structured-output overhead.
+  - *Inference, not measured:* the split has not been counted. PRD 04 can count it with the token-counting endpoint.
+  - If confirmed, the prefix is well above the cacheable minimum, so prompt caching (PRD 04 R5.3) applies. Input is already about two thirds of the extraction cost.
+- **Output for a 3-item extraction is 1,114 tokens.** That includes any adaptive thinking, which is billed in `output_tokens`. Rejections cost ~60 output tokens.
+- **An extraction costs ~$0.030 and takes ~15 s.** A rejection costs ~$0.019 and takes ~3 s, dominated by input.
+- **For a 30-document run**, assuming these per-call numbers hold, the order of magnitude is ~$0.90 and ~7.5 min sequentially. This is an extrapolation from single calls on one-page documents. Multi-page and dense documents will cost more.
 
 ## Risks / Trade-offs
 
