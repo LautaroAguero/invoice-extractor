@@ -58,7 +58,12 @@ The rule: an item field is included only when a business check needs it or it cr
 
 Out: unit (`Unid.`) and per-line VAT amount. Neither feeds a check. Reading `vat_rate` already exercises the glued column.
 
-Whether pyfepdf's `bonif` is an amount or a percentage is unverified (task 3). If it is a percentage, the field becomes `discount_rate` and V2b changes accordingly.
+**Verified (task 3.1):** `bonif` is an **amount**, so the field stays `discount`.
+- pyfepdf computes nothing with it. It prints the value it is given in the "Bonif." column (`Item.BonifNN`), through the same number formatter as the unit price (`fmt_pre`, `%0.2f` with Argentine separators) and with no `%` sign.
+- In the ARCA item web services the per-line discount is an importe.
+- The generator (PRD 02) therefore passes an amount, and V2b is `quantity × unit_price − discount = line_amount`.
+
+**Constraint found in the same source:** pyfepdf's own example writes a *global* discount as a separate item line (`umed=99` "bonificación") with no quantity or price and a negative amount. Such a line would violate the required `quantity`/`unit_price`. The PRD 02 generator should express discounts per line through `bonif`. If global discount lines are wanted later, `quantity` and `unit_price` become optional through a schema change.
 
 ### D4 · Document types: invoices only, and a dedicated failure reason
 
@@ -88,7 +93,13 @@ The root has to be an object, so the union sits under `result`. The flat alterna
 
 The PRD 01 risk "maximum 2 levels of nesting" is read as applying to the invoice (`invoice > issuer.cuit`), not to the envelope.
 
-**To verify (task 2):** Pydantic emits `oneOf` plus a `discriminator` mapping. Confirm what the SDK transforms that into and that the API accepts it. Fallback: plain `anyOf` with a literal `outcome` on each branch, which Pydantic still validates as discriminated client-side.
+**Verified (task 2.1, `anthropic` 1.5.0, `pydantic` 2.13.5, request captured with a mock transport):**
+- The SDK's `transform_schema` rewrites `oneOf` as `anyOf`.
+- It is not a JSON Schema pass-through. It keeps `type`, `enum`, `format` (only `date`, `date-time` and a few others), `minItems` 0/1, `required` and `$ref`/`$defs`. It forces `additionalProperties: false`. Every other keyword is **moved into the description text** and enforced only client-side.
+- `Literal["extracted"]` becomes `const`, which is moved to the description. The API grammar would therefore **not** constrain `outcome` at all.
+  - **Fix:** annotate each `outcome` as a one-value `enum` (`WithJsonSchema({"type": "string", "enum": ["extracted"]})`), which the SDK keeps.
+- The `discriminator` mapping is also moved into the description, as a Python dict repr (noise for the model).
+  - **Fix:** a field-level `json_schema_extra` callable drops the key. Client-side validation still uses the discriminator: an unknown outcome fails with `union_tag_invalid`.
 
 ### D7 · Encoding: exact decimals as strings, ISO dates, identifiers as unconstrained digit strings
 
@@ -98,7 +109,19 @@ The PRD 01 risk "maximum 2 levels of nesting" is read as applying to the invoice
 
 The rule: schema patterns constrain *encoding*, never *domain truth*.
 
-**To verify (task 2):** what the SDK sends for this annotated `Decimal` and for `date`, whether `pattern` survives or is stripped and re-validated client-side, and that a real response round-trips `338650.00` exactly.
+**Verified (task 2.1):**
+- **A JSON number is lossy.** A bare `Decimal` field emits `anyOf[number, string]`. Pydantic parses a JSON number into `Decimal` through a float: `99999999999999.99` becomes `Decimal('99999999999999.98')` and `12345678901234567.89` becomes `Decimal('12345678901234568')`. String encoding is required, not just preferred.
+- **`pattern` is stripped from the grammar.** It is moved into the description, so the API will not stop the model from emitting `"338.650,00"`.
+  - Client-side, `Decimal` rejects `"338.650,00"` (`decimal_parsing`) but accepts `"1e3"`. So the money type needs its own validator that enforces the pattern.
+  - A violation surfaces as `invalid_output` (D10), which PRD 04 routes to corrective retries.
+- **Consequence for implementation:** the money type's JSON Schema is a plain `{"type": "string"}`, and the format rule is written in each field description. A `pattern` would only reach the model as a `{pattern: ...}` suffix in the description, so it adds nothing. The pattern is enforced by the type's validator.
+- **Field descriptions on `$ref` properties are dropped.** `transform_schema` returns only `{"$ref": ...}` for a property that references a `$defs` entry. So a `Field(description=...)` on an `Enum`-typed or nested-model-typed field never reaches the model. Implementation consequences:
+  - Closed sets are `Literal[...]` types, which are emitted inline with `enum` and keep their description.
+  - Nested models (`Issuer`, `Customer`, `Cae`, items) carry their guidance in the class docstring, which lands in `$defs`.
+  - Lists keep their description because the `$ref` sits inside `items`.
+- `date` is sent as `{"type": "string", "format": "date"}` and kept by the SDK.
+- `min_length=1` on a list is sent as `minItems: 1` and kept.
+- The real round-trip of `338650.00` is task 2.2.
 
 ### D8 · Enum values
 
@@ -106,6 +129,28 @@ The rule: schema patterns constrain *encoding*, never *domain truth*.
 - `currency`: `ARS`, `USD`, `EUR`.
 - `vat_condition`: the full ARCA receptor condition list (RG 5616). Values are snake_case forms of the printed labels (`responsable_inscripto`, `consumidor_final`, ...). They are fiscal terms, which the project keeps in Spanish. There is no `other` member: an escape value lets the model skip reading the label. The list is verified against the regulation before it is fixed (task 3).
 - `FailureReason`: `not_an_invoice`, `unsupported_document_type`, `illegible`, `missing_mandatory_data`.
+
+**Verified VAT condition list (task 3.2, 2026-09-14):**
+
+| ARCA Id | Printed label | Value | Receptor valid for classes |
+|---|---|---|---|
+| 1 | IVA Responsable Inscripto | `responsable_inscripto` | A, M, C |
+| 4 | IVA Sujeto Exento | `sujeto_exento` | B, C |
+| 5 | Consumidor Final | `consumidor_final` | B, C |
+| 6 | Responsable Monotributo | `responsable_monotributo` | A, M, C |
+| 7 | Sujeto No Categorizado | `sujeto_no_categorizado` | B, C |
+| 8 | Proveedor del Exterior | `proveedor_del_exterior` | B, C |
+| 9 | Cliente del Exterior | `cliente_del_exterior` | B, C |
+| 10 | IVA Liberado – Ley N° 19.640 | `iva_liberado_ley_19640` | B, C |
+| 13 | Monotributista Social | `monotributista_social` | A, M, C |
+| 15 | IVA No Alcanzado | `iva_no_alcanzado` | B, C |
+| 16 | Monotributo Trabajador Independiente Promovido | `monotributo_trabajador_independiente_promovido` | A, M, C |
+
+Sources and their limits:
+- **ARCA's developer manual** (RG 4291 – Proyecto FE v4.7, revision 1 September 2026) does not print the table. It points to the web-service method `FEParamGetCondicionIvaReceptor`, which requires an ARCA certificate and was not called. The manual does confirm Id 15 = "IVA No Alcanzado", the field being mandatory under RG 5616, and error 10243 (condition not valid for the invoice class).
+- **The full list above comes from a secondary source** (Afip SDK, error 10242 article).
+- The same enum is used for the issuer. Issuer labels ("IVA Responsable Inscripto", "Responsable Monotributo", "IVA Sujeto Exento") are a subset.
+- The class column is not a schema rule. It can back a PRD 04 check.
 
 ### D9 · Client: generic, async, returns a record, never an accumulator
 
@@ -119,16 +164,23 @@ CallRecord[T]
   latency_ms, cost_usd, request_id
 ```
 
+- **Request path, decided 2026-09-14 after task 2.1:**
+  1. Call `messages.create` with `output_config={"format": {"type": "json_schema", "schema": anthropic.transform_schema(output_model)}}`.
+  2. Check `stop_reason`.
+  3. Validate the text block with `TypeAdapter(output_model).validate_json`.
+
+  This is the same schema transform and the same validation `messages.parse` performs, in a different order. `parse` validates inside the call through a post-parser, so on truncated JSON or on a client-side constraint violation it raises `ValidationError` before returning. That loses `usage`, `stop_reason` and `request_id`, which D10 requires. The async raw-response wrapper has no `parse` method to recover them.
+  - *Alternatives considered:* keep `parse` and capture the raw body with an `httpx2` response hook plus a per-call contextvar (fragile, tied to SDK internals, awkward under concurrency); or keep `parse` and drop metrics on those failures (breaks CC-3).
 - It knows nothing about invoices. `ModelFailure` (the schema's `Failed` branch) is a `Parsed` outcome from the client's point of view; the extraction layer interprets it.
 - Latency is wall clock around the SDK call, including SDK transport retries.
 - It holds no cumulative state. Aggregation and spend caps belong to the PRD 03 runner.
-- The SDK dependency is injected (a narrow protocol over `messages.parse`), so tests use a fake with no API key.
+- The SDK dependency is injected (a narrow protocol over `messages.create`), so tests use a fake with no API key.
 
 *Alternative considered:* raising exceptions for truncation and refusal, as the course client does. Rejected: PRD 03 runs many documents and needs a per-document outcome, and PRD 01 R2.4 asks for typed failures, not crashes.
 
 ### D10 · Call-site failure handling
 
-There is one model call site in this change (`ModelClient.parse`, used by the single-document extraction).
+There is one model call site in this change (`ModelClient.call`, used by the single-document extraction).
 
 | Condition | Handling | Outcome |
 |---|---|---|
@@ -137,7 +189,7 @@ There is one model call site in this change (`ModelClient.parse`, used by the si
 | 401/403 authentication/permission, 404 unknown model | Not retried; **raised** | Configuration error: every later call would fail the same way, so the run must stop rather than record N failures |
 | `stop_reason == "max_tokens"` | Checked **before** reading the parsed output. With adaptive thinking the cut usually happens mid-thinking, before any JSON exists | `CallFailure(truncated)`; tokens and cost recorded |
 | `stop_reason == "refusal"` | Checked before the parsed output | `CallFailure(refused)`; tokens and cost recorded |
-| Output fails client-side validation (stripped constraints, `min 1 item`, decimal pattern) | Caught `ValidationError` | `CallFailure(invalid_output)` with the validation errors; tokens and cost recorded. PRD 04 R2.3 routes this into corrective retries |
+| Output fails client-side validation (stripped constraints, `min 1 item`, decimal pattern), or no text block is present | `ValidationError` from validating the text **after** the stop-reason check (D9 request path) | `CallFailure(invalid_output)` with the validation errors; tokens and cost recorded. PRD 04 R2.3 routes this into corrective retries |
 | Unknown model ID in the price table | Checked **before** the call | Raised (configuration error), never a silent default price |
 
 ### D11 · Cost and configuration
@@ -164,7 +216,7 @@ The acceptance run uses two negatives:
 - The spike rendered with `tipo_cbte=3` (nota de crédito A), expected `unsupported_document_type`.
 - Any one-page non-invoice PDF, expected `not_an_invoice`.
 
-Rendered files stay in the gitignored `tools/generate_invoices/out/`. Unit tests never need PDFs, because they use the fake client. Whether pyfepdf changes the printed title for `tipo_cbte=3` is verified in task 3.
+Rendered files stay in the gitignored `tools/generate_invoices/out/`. Unit tests never need PDFs, because they use the fake client. **Verified (task 3.3):** pyfepdf maps `tipo_cbte` to its title and code. `spike_factura_a.py --tipo-cbte 3` renders a nota de crédito A: title "Nota de Crédito", `COD.03`, everything else identical to the Factura A (same number, CAE and amounts). That makes it a hard negative that differs from the invoice only in its title and code.
 
 ## Estimates (ESTIMATED, not measured; replaced by task 10 numbers)
 
@@ -187,5 +239,5 @@ Rendered files stay in the gitignored `tools/generate_invoices/out/`. Unit tests
 
 ## Open Questions
 
-- **List scoring for `vat_breakdown` and `other_taxes`.** `measurement-rules.md` defines only `items`. Options: by position like items, by rate/description, or as a multiset. Stage 1 does not score anything, so this does not change these specs or tasks. It must go through the measurement change log before the PRD 03 baseline.
+- **List scoring for `vat_breakdown` and `other_taxes`** (recorded as PRD 03 OQ-3.2). `measurement-rules.md` defines only `items`. Options: by position like items, by rate/description, or as a multiset. Stage 1 does not score anything, so this does not change these specs or tasks. It must go through the measurement change log before the PRD 03 baseline.
 - **Transport-retry count per call.** Measurement §5 records transport retries separately. The SDK does not return the count directly. Deferred to PRD 03, where it is needed; stage 1 records latency only.

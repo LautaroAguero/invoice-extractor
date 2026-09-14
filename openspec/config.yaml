@@ -18,8 +18,11 @@ context: |
   by an artifact: surface them and ask.
 
   RULES THAT SHAPE EVERY DESIGN DECISION:
-  - Native structured outputs only (messages.parse with a Pydantic model). Never
-    parse JSON from free text.
+  - Native structured outputs only: the Pydantic model's schema goes in
+    output_config.format (SDK transform_schema) and the response is validated
+    against that model after stop_reason is checked. Not messages.parse: it
+    validates inside the call and loses usage on truncated or invalid output.
+    Never parse JSON from free text.
   - Structured outputs guarantee shape, not truth. Business validation is a
     separate module that knows nothing about the model; extraction knows nothing
     about business rules.

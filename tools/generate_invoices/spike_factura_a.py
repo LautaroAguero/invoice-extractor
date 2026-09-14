@@ -8,9 +8,11 @@ This file uses GPL-3.0 code (pyafipws), so it is GPL-3.0 as well. It is not
 imported by the extractor package.
 
 Usage:
-    .venv/Scripts/python spike_factura_a.py
+    .venv/Scripts/python spike_factura_a.py                 # Factura A
+    .venv/Scripts/python spike_factura_a.py --tipo-cbte 3   # Nota de Crédito A (a negative)
 """
 
+import argparse
 import inspect
 import json
 from decimal import Decimal
@@ -29,6 +31,8 @@ OUT_DIR = HERE / "out"
 
 IVA_IDS = {Decimal("21"): 5, Decimal("10.5"): 4}  # AFIP alicuota ids
 CENT = Decimal("0.01")
+# Class A comprobante codes this spike can render; the file stem names the output.
+TIPOS_CBTE = {1: "spike_factura_a", 2: "spike_nota_debito_a", 3: "spike_nota_credito_a"}
 
 
 def cuit_with_check_digit(base10: str) -> str:
@@ -75,6 +79,12 @@ invoice = {
 
 
 def main() -> None:
+    parser = argparse.ArgumentParser(description=__doc__.splitlines()[0])
+    parser.add_argument("--tipo-cbte", type=int, choices=sorted(TIPOS_CBTE), default=1)
+    args = parser.parse_args()
+    invoice["tipo_cbte"] = args.tipo_cbte
+    stem = TIPOS_CBTE[args.tipo_cbte]
+
     fepdf = FEPDF()
     # pyfepdf swallows exceptions by default and returns False, which would let a
     # broken PDF ship with a JSON that claims it is fine.
@@ -149,7 +159,7 @@ def main() -> None:
     fepdf.ProcesarPlantilla(num_copias=1, lineas_max=24, qty_pos="izq")
 
     OUT_DIR.mkdir(exist_ok=True)
-    pdf_path = OUT_DIR / "spike_factura_a.pdf"
+    pdf_path = OUT_DIR / f"{stem}.pdf"
     fepdf.GenerarPDF(archivo=str(pdf_path))
 
     rendered = {
@@ -162,7 +172,7 @@ def main() -> None:
         "imp_iva": str(imp_iva),
         "imp_total": str(imp_total),
     }
-    (OUT_DIR / "spike_factura_a.rendered.json").write_text(
+    (OUT_DIR / f"{stem}.rendered.json").write_text(
         json.dumps(rendered, ensure_ascii=False, indent=2), encoding="utf-8"
     )
     print(f"pdf: {pdf_path} ({pdf_path.stat().st_size} bytes)")

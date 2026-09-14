@@ -27,7 +27,7 @@ Without a labelled dataset, nobody can say how good the extractor is, and every 
 - **R1.2 Fails loudly.** It runs with `LanzarExcepciones = True`. A rendering error aborts that document; it never writes ground truth next to a broken PDF.
 - **R1.3 Valid synthetic identifiers.** CUITs carry a correct mod-11 check digit, except where a case deliberately tests an invalid one (that case must be tagged). CAE numbers have 14 digits.
 - **R1.4 Arithmetic consistent by construction.** Items sum to net, VAT per rate matches its base, and net plus VAT plus other taxes equals the total. Values are exact decimals with explicit rounding.
-- **R1.5 Variation, not one template.** It covers invoice types A, B, C and E, at least 3 visual layouts (edited pyfepdf CSV templates), 1 to 30+ items, mixed VAT rates (21% and 10.5%), discounts, other taxes, and optional fields present or absent.
+- **R1.5 Variation, not one template.** It covers invoice types A, B, C and E, at least 3 visual layouts (edited pyfepdf CSV templates), 1 to 30+ items, mixed VAT rates (21% and 10.5%), discounts, other taxes, and optional fields present or absent. Discounts are per-line `bonif` amounts; a global discount written as a separate item line (pyfepdf `umed=99`, no quantity or price) does not fit the schema's required `quantity`/`unit_price` (stage 1 design D3).
 - **R1.6 Isolated.** It has its own venv and requirements, is GPL-3.0 and is never imported by the extractor package.
 
 ### R2 · Hard cases (≥8)
@@ -42,13 +42,15 @@ Each hard case is tagged in the manifest. Required coverage:
 | `image_input` | JPG instead of PDF | Same degradation pipeline, saved as JPG (covers the second input format) |
 | `missing_optional` | Customer CUIT, address or due date absent | B to final consumer, etc. |
 | `not_an_invoice` | Similar-looking non-invoice (remito, presupuesto) | Edited template without CAE/VAT, "no válido como factura" |
+| `unsupported_document` | Nota de crédito or nota de débito (a fiscal document that looks exactly like an invoice); expected failure reason `unsupported_document_type` | Same generator with `tipo_cbte` 2/3 (A), 7/8 (B), 12/13 (C) |
 | `dense_table` | Long descriptions and overlapping columns | Long `ds` text; the known IVA/price column overlap |
 
 Proposed composition (to confirm): 20 regular (A ×8, B ×7, C ×5) plus 10 hard (multi_page ×2, foreign_currency ×2, skewed_scan ×2, image_input ×1, missing_optional ×1, not_an_invoice ×2).
 
 ### R3 · Ground truth
 
-- **R3.1 Visible truth rule.** Ground truth is **what is visible on the rendered document**, not the dict fed to the generator. If the template truncates a description or reformats a number, the ground truth follows the document.
+- **R3.1 Visible truth rule.** Ground truth is **what is visible on the rendered document**, not the dict fed to the generator. If the template truncates a description or reformats a number, the ground truth follows the document. Optional values that are not printed are `null` and are never computed (for example `net_amount` on a Factura B).
+  - **Exception, `currency`:** when the document prints no currency, ground truth is `ARS`. This is the fiscal convention stated in the schema field description, not an inference (stage 1 design D1).
 - **R3.2 Schema-shaped.** Ground truth for `expected_outcome = extracted` validates against the PRD 01 result schema. Ground truth for `not_an_invoice` records the expected failure, not an invoice.
 - **R3.3 Format follows the measurement rules.** Absent optional fields are explicit `null` (never omitted keys), because `null`=`null` scores as correct. Items keep document order, because items are matched by position. Amounts are exact decimal strings, because amounts are compared exactly.
 
@@ -91,5 +93,5 @@ Documents used as few-shot examples in prompts (PRD 04) are generated with seeds
 
 ## Open questions
 
-- **OQ-2.1** Is a nota de crédito in scope (a fiscal document shaped like an invoice) or a `not_an_invoice` negative?
+- ~~OQ-2.1 Nota de crédito in scope or negative~~ resolved 2026-09-14: **out of scope, as a negative**. Notas de crédito/débito and factura M expect a failure with reason `unsupported_document_type` (distinct from `not_an_invoice`). They are tagged `unsupported_document` and their manifest `expected_outcome` is `explicit_failure`.
 - **OQ-2.2** Do the JPG and no-text-layer cases count toward the 30, or are they extra variants of existing documents? Variants give a cleaner paired comparison of ingestion paths.

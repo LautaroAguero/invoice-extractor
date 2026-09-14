@@ -1,0 +1,69 @@
+{
+  "result": {
+    "outcome": "extracted",
+    "invoice": {
+      "invoice_type": "A",
+      "document_code": "01",
+      "point_of_sale": "00003",
+      "invoice_number": "00001542",
+      "issue_date": "2026-08-12",
+      "due_date": "2026-09-11",
+      "issuer": {
+        "name": "Tecnored Patagonia S.A.",
+        "cuit": "30712345671",
+        "vat_condition": "responsable_inscripto"
+      },
+      "customer": {
+        "name": "Distribuidora Los Andes S.R.L.",
+        "cuit": "30687654311",
+        "address": "Av. San Martin 1234, Mendoza",
+        "vat_condition": "responsable_inscripto"
+      },
+      "currency": "ARS",
+      "exchange_rate": null,
+      "items": [
+        {
+          "code": "SRV-01",
+          "description": "Soporte tecnico mensual",
+          "quantity": "1.00",
+          "unit_price": "150000.00",
+          "discount": "0.00",
+          "vat_rate": "21",
+          "line_amount": "150000.00"
+        },
+        {
+          "code": "HW-220",
+          "description": "Router dual band AX3000",
+          "quantity": "2.00",
+          "unit_price": "48500.00",
+          "discount": "0.00",
+          "vat_rate": "21",
+          "line_amount": "97000.00"
+        },
+        {
+          "code": "LIB-07",
+          "description": "Manual de configuracion impreso",
+          "quantity": "3.00",
+          "unit_price": "12000.00",
+          "discount": "0.00",
+          "vat_rate": "10.5",
+          "line_amount": "36000.00"
+        }
+      ],
+      "vat_breakdown": [
+        {"rate": "10.5", "amount": "3780.00"},
+        {"rate": "21", "amount": "51870.00"}
+      ],
+      "other_taxes": [],
+      "net_amount": "283000.00",
+      "non_taxed_amount": "0.00",
+      "exempt_amount": "0.00",
+      "vat_amount": null,
+      "total": "338650.00",
+      "cae": {
+        "number": "76321458963214",
+        "expiry_date": "2026-08-22"
+      }
+    }
+  }
+}

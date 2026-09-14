@@ -38,7 +38,7 @@ Stages are ordered on purpose. **Nothing gets "improved" before stage 3 can meas
 | Domain | Argentine invoices (A, B, C, E) | Rich redundancies that can be checked deterministically: CUIT check digit, VAT rules per invoice type, items → net → VAT → total, CAE | — |
 | Data source | 100% synthetic, rendered with pyafipws `pyfepdf` | Ground truth by construction, publishable, no personal data | Headline precision is needed on real invoices |
 | Repo language | English (code, schema, prompts, docs). Fiscal terms stay in Spanish inside field descriptions (CUIT, CAE, Responsable Inscripto) | Broad audience; the model must match the literal strings printed on the document | — |
-| Structured output level | Native structured outputs (`messages.parse` with a Pydantic model) | Level 3 in course chapter 5: shape guaranteed by the API | — |
+| Structured output level | Native structured outputs: Pydantic model schema via `output_config.format` (SDK `transform_schema`), response validated against the same model after checking `stop_reason` | Level 3 in course chapter 5: shape guaranteed by the API. Not `messages.parse`, which validates inside the call and loses usage on truncated or invalid output | — |
 | Generator isolation | `tools/generate_invoices/` has its own venv and requirements and is never imported by the extractor | pyafipws is GPL-3.0 and needs compatibility patches on Python 3.14 | — |
 | Provider SDK | Official `anthropic` Python SDK | — | Provider comparison becomes a goal |
 | Baseline model | `claude-sonnet-5` | Middle tier on price ($2/$10 per MTok), so the log can move both ways: up to Opus 5 for quality, down to Haiku 4.5 for cost | Baseline is too weak or too strong to leave room for measurable iterations |
@@ -58,7 +58,7 @@ Stages are ordered on purpose. **Nothing gets "improved" before stage 3 can meas
 ## Verified platform facts (as of 2026-09-14; re-verify before relying on them)
 
 - Native structured outputs are supported on `claude-opus-5`, `claude-sonnet-5` and `claude-haiku-4-5`. On `messages.create` the parameter is `output_config={"format": ...}`; `output_format=` is only the `messages.parse()` helper argument.
-- Unsupported JSON Schema features: numeric constraints (`minimum`, `maximum`), string length constraints, recursive schemas. The Python SDK strips them from the schema and validates them client-side, so `parse()` can still raise a validation error.
+- Unsupported JSON Schema features: numeric constraints (`minimum`, `maximum`), string length constraints, recursive schemas. The Python SDK's `transform_schema` moves them (and `pattern`, `const` and `discriminator`) out of the schema into the field description, so they are validated only client-side and response validation can still fail (verified 2026-09-14, `anthropic` 1.5.0).
 - Citations cannot be combined with structured outputs (the request returns 400). Source quotes, if wanted, must be schema fields.
 - PDF input: 32 MB per request; 600 pages, or 100 when the request's context window is under 1M tokens (Haiku 4.5 has 200K). Each page costs roughly 1,500–3,000 text tokens plus the page image.
 - List prices, USD per million input/output tokens: Opus 5 $5/$25, Sonnet 5 $2/$10, Haiku 4.5 $1/$5. Batch API is 50% off.

@@ -23,14 +23,15 @@ Structured outputs guarantee **shape**, not **truth**: a perfectly typed invoice
 
 ### R1 · Business validation (≥5 checks the schema cannot express)
 
-The validator takes a parsed invoice and returns a list of typed problems; it never raises for a business problem. Checks:
+The validator takes a parsed invoice and returns a list of typed problems; it never raises for a business problem. Field names refer to the stage 1 schema (`src/invoice_extractor/schema.py`). V2b and the WSFE form of V3 were added on 2026-09-14 by the stage 1 design (D2, D3). Checks:
 
 | # | Check | Redundancy it exploits |
 |---|---|---|
 | V1 | Issuer CUIT (and customer CUIT when present) passes the mod-11 check digit | Identifier self-check |
 | V2 | Sum of item amounts equals net amount (within explicit rounding rules) | Items ↔ net |
-| V3 | Net + VAT + other taxes equals total | Totals |
-| V4 | Each VAT breakdown amount equals base × rate (within rounding) | Rates ↔ amounts |
+| V2b | Per item: quantity × unit price − discount equals line amount (within rounding) | Line arithmetic ↔ printed amount |
+| V3 | WSFE total: net + non-taxed + exempt + VAT + sum(other taxes) equals total; absent terms count as zero, and VAT is `vat_amount` or, when that is not printed, the sum of `vat_breakdown` | Totals |
+| V4 | Each VAT breakdown amount equals base × rate (within rounding). The base per rate is not printed: it is the sum of line amounts of the items with that `vat_rate` | Rates ↔ amounts |
 | V5 | Invoice type rules: A discriminates VAT and has a customer CUIT; B and C show no VAT breakdown; E uses a foreign currency with an exchange rate, or explains why not | Fiscal rules ↔ fields |
 | V6 | Dates: issue date not in the future; due date ≥ issue date; CAE expiry ≥ issue date | Date coherence |
 | V7 | Formats: point of sale 5 digits, invoice number 8 digits, CAE 14 digits | Identifier formats |

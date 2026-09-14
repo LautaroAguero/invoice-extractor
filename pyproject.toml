@@ -1,0 +1,23 @@
+[build-system]
+requires = ["setuptools>=75"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "invoice-extractor"
+version = "0.1.0"
+description = "Extracts Argentine invoices into validated objects and measures its own reliability and cost."
+requires-python = ">=3.14"
+dependencies = [
+    "anthropic",
+    "pydantic>=2",
+    "python-dotenv",
+]
+
+[project.optional-dependencies]
+dev = ["pytest"]
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]

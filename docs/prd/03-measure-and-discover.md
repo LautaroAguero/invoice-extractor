@@ -108,3 +108,4 @@ LATENCY              p50 x.xs · p95 x.xs                (wall clock per documen
 
 - ~~OQ-1 Measurement rules~~ resolved 2026-09-14 (1a, 2a, 3c, 4b, 5a) in [docs/measurement-rules.md](../measurement-rules.md). Items are matched by position; reconsider only through the change log if the failure analysis shows shift cascades.
 - **OQ-3.1** Which local library for path B (pypdf, pdfplumber, pymupdf)? Table extraction quality differs, and so does licensing (pymupdf is AGPL).
+- **OQ-3.2** How are the lists `vat_breakdown` and `other_taxes` scored? `measurement-rules.md` defines only `items` (§3), and leaf-field scoring (§2) does not cover lists. Options: by position like items, matched by rate/description, or as a multiset. Raised by the stage 1 schema (2026-09-14). **Must be decided through the measurement change log before the baseline run.**

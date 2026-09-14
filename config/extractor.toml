@@ -1,0 +1,29 @@
+# Extractor configuration. The API key comes from the environment (.env), never from here.
+
+model = "claude-sonnet-5"
+max_tokens = 16000
+timeout_seconds = 120.0
+max_retries = 3
+
+# USD per million tokens. Cache multipliers apply to the input price.
+# Source: docs/prd/00-overview.md "Verified platform facts".
+[prices.claude-opus-5]
+input = "5.00"
+output = "25.00"
+cache_read_multiplier = "0.1"
+cache_write_multiplier = "1.25"
+verified_on = 2026-09-14
+
+[prices.claude-sonnet-5]
+input = "2.00"
+output = "10.00"
+cache_read_multiplier = "0.1"
+cache_write_multiplier = "1.25"
+verified_on = 2026-09-14
+
+[prices.claude-haiku-4-5]
+input = "1.00"
+output = "5.00"
+cache_read_multiplier = "0.1"
+cache_write_multiplier = "1.25"
+verified_on = 2026-09-14
