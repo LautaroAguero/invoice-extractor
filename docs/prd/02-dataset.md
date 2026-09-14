@@ -1,6 +1,6 @@
 # PRD 02 · Dataset
 
-Status: draft · Stage 2 of 5 · Depends on: PRD 01 (schema), OQ-1 (measurement rules) · Course estimate: ~3 h
+Status: draft · Stage 2 of 5 · Depends on: PRD 01 (schema), [measurement rules](../measurement-rules.md) · Course estimate: ~3 h
 
 ## Why
 
@@ -50,7 +50,7 @@ Proposed composition (to confirm): 20 regular (A ×8, B ×7, C ×5) plus 10 hard
 
 - **R3.1 Visible truth rule.** Ground truth is **what is visible on the rendered document**, not the dict fed to the generator. If the template truncates a description or reformats a number, the ground truth follows the document.
 - **R3.2 Schema-shaped.** Ground truth for `expected_outcome = extracted` validates against the PRD 01 result schema. Ground truth for `not_an_invoice` records the expected failure, not an invoice.
-- **R3.3 Format depends on OQ-1.** How optional-absent fields and items are represented must match the comparison rules decided in PRD 03.
+- **R3.3 Format follows the measurement rules.** Absent optional fields are explicit `null` (never omitted keys), because `null`=`null` scores as correct. Items keep document order, because items are matched by position. Amounts are exact decimal strings, because amounts are compared exactly.
 
 ### R4 · Manifest
 
@@ -91,6 +91,5 @@ Documents used as few-shot examples in prompts (PRD 04) are generated with seeds
 
 ## Open questions
 
-- **OQ-1 (blocking)** Measurement rules; they define R3.3. See PRD 03.
 - **OQ-2.1** Is a nota de crédito in scope (a fiscal document shaped like an invoice) or a `not_an_invoice` negative?
 - **OQ-2.2** Do the JPG and no-text-layer cases count toward the 30, or are they extra variants of existing documents? Variants give a cleaner paired comparison of ingestion paths.

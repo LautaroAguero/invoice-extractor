@@ -81,10 +81,10 @@ Reference: `ai-engineer-lab/practice/llm_client.py` (course chapter 3) is the st
 | Risk | Mitigation |
 |---|---|
 | `Decimal`/`date` JSON Schema encoding differs from expectations, so parsing fails or values arrive as floats | Verify the schema the SDK sends in stage 1, before building on it |
-| Opus 5 adaptive thinking inflates output cost for a simple extraction | Record thinking in output tokens; effort tuning is a PRD 04 iteration, not a stage 1 change |
+| Sonnet 5 adaptive thinking (on by default) inflates output cost for a simple extraction | Record thinking in output tokens; effort tuning is a PRD 04 iteration, not a stage 1 change |
 | Schema too deep hurts quality and retries | Maximum 2 levels of nesting |
 
 ## Open questions
 
-- **OQ-1.1** Baseline model: `claude-opus-5` (default recommendation) or a cheaper model? The choice sets the reference row of the iteration log.
-- **OQ-1.2** Should `vat_breakdown` be derived by code from items instead of extracted? Deriving removes a redundancy that validation could use.
+- ~~OQ-1.1 Baseline model~~ resolved 2026-09-14: `claude-sonnet-5`. Verified behavior to respect: adaptive thinking runs when `thinking` is omitted; `temperature`/`top_p`/`top_k` are rejected with 400, so non-determinism is controlled through fixed prompts and schema, never through sampling parameters; `budget_tokens` is rejected; native structured outputs are supported.
+- ~~OQ-1.2 Derive or extract `vat_breakdown`~~ resolved 2026-09-14: the model **extracts** it. Keeping it as an extracted field preserves the redundancy that business check V4 (PRD 04) uses to detect invented or misread amounts.

@@ -1,32 +1,64 @@
 schema: spec-driven
 
-# Project context (optional)
-# This is shown to AI when creating artifacts.
-# Add your tech stack, conventions, style guides, domain knowledge, etc.
-# Example:
-#   context: |
-#     Tech stack: TypeScript, React, Node.js
-#     We use conventional commits
-#     Domain: e-commerce platform
+# Project context shown to AI when creating artifacts.
+context: |
+  invoice-extractor turns Argentine invoices (facturas A, B, C, E) into validated,
+  structured objects, and measures its own reliability and cost per document.
+  The measurement is the product: an extractor without measured per-field
+  precision and cost per document is not finished. It is a portfolio project
+  (course project 1, module "the model as a component").
 
-# Per-artifact rules (optional)
-# Add custom rules for specific artifacts.
-# Example:
-#   rules:
-#     proposal:
-#       - Keep proposals under 500 words
-#       - Always include a "Non-goals" section
-#     tasks:
-#       - Break tasks into chunks of max 2 hours
+  Tech stack: Python 3.14, official `anthropic` SDK, Pydantic, pytest.
+  Baseline model: claude-sonnet-5 (adaptive thinking on by default; sampling
+  parameters like temperature are rejected by the API, never use them).
 
-# Per-operation guidance (optional)
-# Add advisory guidance for how apply and archive work should be conducted.
-# This is separate from artifact rules above.
-# Example:
-#   operations:
-#     apply:
-#       guidance:
-#         - Keep test summaries concise
-#     archive:
-#       guidance:
-#         - Summarize the archive outcome before finishing
+  Product requirements live in docs/prd/ (00-overview plus one PRD per stage).
+  Every change maps to a stage PRD and must cite the requirement IDs it covers
+  (e.g. "PRD 01 R2.3"). Open questions (OQ-*) in a PRD are NOT resolved silently
+  by an artifact: surface them and ask.
+
+  RULES THAT SHAPE EVERY DESIGN DECISION:
+  - Native structured outputs only (messages.parse with a Pydantic model). Never
+    parse JSON from free text.
+  - Structured outputs guarantee shape, not truth. Business validation is a
+    separate module that knows nothing about the model; extraction knows nothing
+    about business rules.
+  - A model with no way to fail invents data. The result schema always has an
+    explicit failure outcome, and an extractor returns an explicit failure rather
+    than a bad object.
+  - Corrective retries carry the previous errors in context and have a hard cap.
+    Spend is capped per run. Nothing can spend without limit.
+  - Every model call records model ID, tokens (incl. cache), stop reason,
+    latency and cost computed from usage. Estimates are not measurements.
+  - Prompts are versioned files in prompts/extract_invoice/vN.md.
+  - Tests never call the API: pytest passes with no API key (fake client and
+    recorded fixtures; no assertions on exact model text).
+  - Measurement follows docs/measurement-rules.md, fixed before the baseline and
+    changed only through its change log. n=30 means ~±9 points of noise: every
+    rate carries n and a 95% Wilson interval, and comparisons are paired (McNemar).
+
+  Domain: Argentine fiscal invoices. CUIT has a mod-11 check digit; type A
+  discriminates VAT and has a customer CUIT; B and C do not show a VAT breakdown;
+  E is for export, usually in foreign currency. Items sum to net; net + VAT +
+  other taxes = total; CAE is 14 digits with an expiry date.
+
+  Data: 100% SYNTHETIC, rendered by tools/generate_invoices/ (pyafipws pyfepdf,
+  GPL-3.0, own venv, never imported by the extractor). Ground truth is what is
+  visible on the rendered document, not the generator input. No real person or
+  company data anywhere in the repo.
+
+  Language: code, comments, docs and OpenSpec artifacts in English. Fiscal terms
+  printed on invoices stay in Spanish inside schema field descriptions (CUIT,
+  CAE, Responsable Inscripto). Conversation with the user in Spanish.
+
+# Per-artifact rules.
+rules:
+  proposal:
+    - Name the stage PRD and list the requirement IDs this change covers.
+    - List any PRD open questions (OQ-*) the change depends on and their status.
+  design:
+    - Include expected tokens per call, cost per document and latency, marked as estimated until measured.
+    - For every model call site, state how API errors, timeouts, rate limits and truncated or refused output are handled.
+  tasks:
+    - Every task that touches the model includes its API-free test.
+    - Keep tasks small enough to verify independently (about 2 hours max).

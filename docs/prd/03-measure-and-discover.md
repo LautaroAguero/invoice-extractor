@@ -1,6 +1,6 @@
 # PRD 03 · Measure and discover
 
-Status: draft · Stage 3 of 5 · Depends on: PRD 01, PRD 02, OQ-1 · Course estimate: ~2 h
+Status: draft · Stage 3 of 5 · Depends on: PRD 01, PRD 02, [measurement rules](../measurement-rules.md) · Course estimate: ~2 h
 
 ## Why
 
@@ -34,7 +34,7 @@ This stage turns "it seems to work" into numbers. Running the baseline over the 
 ### R2 · Comparison
 
 - **R2.1** Values are normalized before comparing: decimals compared exactly after parsing; dates as ISO; strings case- and whitespace-normalized; CUIT digits only. Normalization is unit-tested.
-- **R2.2** Comparison follows the rules decided in OQ-1 (below). Those rules are written in `docs/measurement-rules.md` **before** the first baseline run, so the numbers cannot be bent to fit.
+- **R2.2** Comparison follows [docs/measurement-rules.md](../measurement-rules.md). The rules are committed **before** the first baseline run, so the numbers cannot be bent to fit, and they change only through that file's change log.
 - **R2.3** A value predicted where ground truth is absent is counted separately as an **invented value**. It is the most dangerous error an extractor makes and gets its own line in the report.
 
 ### R3 · Report
@@ -42,15 +42,20 @@ This stage turns "it seems to work" into numbers. Running the baseline over the 
 One command produces it, in the terminal and as markdown. It contains at least:
 
 ```
-DOCUMENTS            30
+DOCUMENTS            30   (in-domain n · not_an_invoice n)
 Correct outcome      n/30  (xx.x%)  [95% CI]
-  extracted          n
-  explicit failure   n   (correct rejections n · false rejections n)
+  extraction rate    n/in-domain  (xx.x%)  [95% CI]
+  false rejections   n
+  correct rejections n
+  false acceptances  n                        ← always shown
 Invented values      n
+Missed values        n
 
-FIELD PRECISION                n/N    %      95% CI
+FIELD PRECISION  (over successful extractions: N)
+                               n/N    %      95% CI
   <field>                      ...
-  items (per OQ-1 rule)        ...
+  items_exact                  ...
+  items_per_item               n/items  ...  (extra items n)
   <worst field>                ...           ← worst field
 
 BY TAG                         (multi_page, foreign_currency, skewed_scan, ...)
@@ -85,7 +90,7 @@ LATENCY              p50 x.xs · p95 x.xs                (wall clock per documen
 - [ ] `docs/measurement-rules.md` exists and is committed before the baseline run record.
 - [ ] One command produces the report from the dataset. A second command re-renders it from a saved run record without network access.
 - [ ] Per-field precision and cost per document come from the run record, not estimates.
-- [ ] The report shows n and a 95% interval for every rate, plus the invented-values count.
+- [ ] The report shows n and a 95% interval for every rate, the extraction rate next to field precision, and the invented, missed and extra-item counts.
 - [ ] A spend cap stops a run and the partial run is marked incomplete (verified with a mocked client).
 - [ ] A paired comparison of path A vs path B exists with numbers and a stated winner.
 - [ ] `docs/failure-analysis.md` names the worst field and ranks hypotheses with evidence.
@@ -101,10 +106,5 @@ LATENCY              p50 x.xs · p95 x.xs                (wall clock per documen
 
 ## Open questions
 
-- **OQ-1 (blocking) Measurement rules.** Decide and write them down before the first baseline:
-  1. **Correct rejection:** does an explicit failure on a `not_an_invoice` document count as a correct outcome in the headline rate, or is it reported only on a separate line?
-  2. **Optional field absent:** ground truth `null` and prediction `null`: correct, or excluded from the denominator?
-  3. **Items:** whole list exact, per-item match (by position or by description), or both?
-  4. **Field denominator:** all in-domain documents (a failed extraction counts as wrong for every field) or only successfully extracted documents? The course example uses the second (`cuit_emisor 24/28`); it hides failures inside field precision unless reported alongside.
-  5. **Tolerance:** exact decimal match, or a tolerance for amounts?
+- ~~OQ-1 Measurement rules~~ resolved 2026-09-14 (1a, 2a, 3c, 4b, 5a) in [docs/measurement-rules.md](../measurement-rules.md). Items are matched by position; reconsider only through the change log if the failure analysis shows shift cascades.
 - **OQ-3.1** Which local library for path B (pypdf, pdfplumber, pymupdf)? Table extraction quality differs, and so does licensing (pymupdf is AGPL).

@@ -41,6 +41,8 @@ Stages are ordered on purpose. **Nothing gets "improved" before stage 3 can meas
 | Structured output level | Native structured outputs (`messages.parse` with a Pydantic model) | Level 3 in course chapter 5: shape guaranteed by the API | — |
 | Generator isolation | `tools/generate_invoices/` has its own venv and requirements and is never imported by the extractor | pyafipws is GPL-3.0 and needs compatibility patches on Python 3.14 | — |
 | Provider SDK | Official `anthropic` Python SDK | — | Provider comparison becomes a goal |
+| Baseline model | `claude-sonnet-5` | Middle tier on price ($2/$10 per MTok), so the log can move both ways: up to Opus 5 for quality, down to Haiku 4.5 for cost | Baseline is too weak or too strong to leave room for measurable iterations |
+| Measurement rules | [docs/measurement-rules.md](../measurement-rules.md): correct rejection counts in the headline; `null`=`null` is correct; items scored exact and per-item; field precision over successful extractions; exact decimal amounts | Fixed before the baseline so numbers cannot be bent | Only through that file's change log |
 
 ## Cross-cutting requirements (apply to every stage)
 
@@ -70,6 +72,7 @@ With n=30, one run's pass rate has a noise floor of about ±8.9 points (95%). Be
 - Per-field precision is the main signal, not only the per-document rate.
 - Every reported rate carries its n and interval.
 
-## Open questions (blocking)
+## Open questions
 
-- **OQ-1 Measurement rules.** Blocks the ground truth format in PRD 02 and the report in PRD 03. See PRD 03 § Open questions.
+- ~~OQ-1 Measurement rules~~ resolved 2026-09-14 in [docs/measurement-rules.md](../measurement-rules.md).
+- Per-stage questions live in each PRD.
