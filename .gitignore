@@ -1,0 +1,14 @@
+# Secrets
+.env
+.env.*
+!.env.example
+
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+*.egg-info/
+.pytest_cache/
+
+# Generator scratch output (the curated dataset lives in ground_truth/)
+tools/generate_invoices/out/

@@ -1,0 +1,18 @@
+# Synthetic invoice generator only. Kept apart from the extractor package:
+# pyafipws is GPL-3.0 and pins deps that do not build on Python 3.12+.
+#
+# Install (pyafipws must go without its own deps):
+#   python -m venv .venv
+#   .venv/Scripts/python -m pip install -r requirements.txt
+#   .venv/Scripts/python -m pip install --no-deps "git+https://github.com/reingart/pyafipws.git@d595b07"
+fpdf==1.7.2
+future==1.0.0
+httplib2==0.32.0
+pillow==12.3.0
+qrcode==8.2
+# PyPI's pysimplesoap is ancient; the py3k branch is what pyafipws expects.
+PySimpleSOAP @ git+https://github.com/pysimplesoap/pysimplesoap.git@31c85822dec55de8df947a62db99a298b4aa1a51
+# Provides the distutils shim that pysimplesoap imports (removed in Python 3.12).
+setuptools==84.0.0
+# Only used to sanity-check the text layer of generated PDFs.
+pypdf==6.18.1
