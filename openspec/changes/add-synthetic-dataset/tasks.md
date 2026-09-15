@@ -45,7 +45,7 @@
 - [x] 7.1 Generate the 30 documents into `ground_truth/`. Verify that generation exits cleanly, every in-domain document passed verification, and the composition check passes.
 - [x] 7.2 Regenerate into a temporary directory from the manifest. Verify byte identity for ground truth and clean PDFs, and pixel identity for degraded documents.
 - [x] 7.3 Add an extractor test (`tests/test_dataset.py`, no API, no change to `src/`) that validates every `ground_truth/*.json` against the extraction result schema, and every in-domain CUIT against mod-11. Verify that `pytest` at the repo root passes with the API key unset.
-- [ ] 7.4 Human review of all 30 documents against their ground truth, using the review checklist from 6.4 (user task). Verify that every manifest entry has `reviewed_by` and `reviewed_at`, and that any correction went through the generator, never through hand-edited JSON.
+- [x] 7.4 Human review of all 30 documents against their ground truth, using the review checklist from 6.4 (user task). Verify that every manifest entry has `reviewed_by` and `reviewed_at`, and that any correction went through the generator, never through hand-edited JSON. Done 2026-09-15 by LautaroAguero. A01 and A02 were recorded as they were reviewed; the other 28 were reviewed first and recorded afterwards in one batch at the reviewer's confirmation, so their `reviewed_at` is the recording time, not the review time.
 
 ## 8. Real set
 
