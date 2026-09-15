@@ -45,10 +45,13 @@ context: |
   E is for export, usually in foreign currency. Items sum to net; net + VAT +
   other taxes = total; CAE is 14 digits with an expiry date.
 
-  Data: 100% SYNTHETIC, rendered by tools/generate_invoices/ (pyafipws pyfepdf,
-  GPL-3.0, own venv, never imported by the extractor). Ground truth is what is
-  visible on the rendered document, not the generator input. No real person or
-  company data anywhere in the repo.
+  Data: every headline metric runs on 30 SYNTHETIC documents in ground_truth/,
+  rendered by tools/generate_invoices/ (pyafipws pyfepdf, GPL-3.0, own venv,
+  never imported by the extractor). Ground truth is what is visible on the
+  rendered document, not the generator input. A separate 2-document real set
+  (ground_truth_real/) is git-ignored, hand-annotated, and reported apart from
+  the synthetic metrics — never mixed into them. No real person or company data
+  is ever committed to the repo.
 
   Language: code, comments, docs and OpenSpec artifacts in English. Fiscal terms
   printed on invoices stay in Spanish inside schema field descriptions (CUIT,

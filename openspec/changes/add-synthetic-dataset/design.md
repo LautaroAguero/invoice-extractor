@@ -98,6 +98,12 @@ Derived from the pyfepdf source at the pinned commit. Task 2 confirms each lette
 
 "IVA Contenido" (Ley 27.743) is not printed on B because the template has no field for it (decision (a) in exploration). The printed item rate on B for a consumidor final is kept in the ground truth, because it is visible.
 
+**Confirmed by rendering (task 3.1):** one clean document per family (A; B to a responsable inscripto; B to a consumidor final via `tipo_doc=99`, `nro_doc="0"`, blank name/address; C; E in USD) matches this table exactly, no deviations. Note for D9/task 6: pyfepdf's own `f.set("IVA.L", "IVA Contenido:")` path (triggered whenever letra is B and the customer category matches consumidor final/exento) is a true no-op on `qr_base`/`qr_variant` — those templates never define an `IVA.L`/`IVALIQ` field, so the "IVA Contenido" line cannot print no matter what the customer category is.
+
+**Confirmed by rendering (task 3.2):** a 30-item Factura A (`lineas_max=24`) split across 2 pages exactly as described: page 1 ends with "Subtotal: 15.010,00" and no "Neto:"/"Total:"/per-rate IVA lines (plus a "Continúa en hoja 2" note); page 2 alone carries "Neto:", "Subtotal:", "IVA 21% ..." and "Total:". A description far longer than its cell **wraps** onto several lines inside the same row (fpdf's `split_multicell`, not truncation) — the row grows taller. Its other columns are anchored at a fixed y and do not wrap with it: **Cantidad sits at the row's top**, level with the description's *first* wrapped line, while Bonif./Precio/IVA/Importe sit at the row's bottom, level with its *last* wrapped line (corrected from an earlier, wrong reading of this same render — task 7.1 caught it because it broke a real check, not just this note).
+
+**Correction found generating the real dataset (task 7.1, case A03):** because Cantidad shares the first wrapped line, pdfplumber's left-to-right reading order splices it into the middle of the description text — e.g. "...(rollo 300m) - 4,00 descripcion extendida..." where "4,00" is the row's quantity, not part of the description. A plain whitespace-collapsed substring match (the original D2 rule) fails on this, even though the description printed exactly as intended. `generator/verify.py` now matches an item's `description` as a **word subsequence** (every word of the expected description found in order, other words allowed in between) instead of a contiguous substring; every other field keeps the strict substring check. This is a narrow, targeted loosening — proportionate to the D2 blind spot already accepted ("common strings match anywhere"), not a general weakening of the check.
+
 ### D4 · Two layouts
 
 - **`qr_base`:** upstream `plantillas/factura_qr.csv` at the pinned commit, copied into `templates/` with the same edits the spike applies (no pyafipws logo, image paths made local). QR is the current ARCA format (RG 4892/2020); the barcode template stays only as the spike's reference.
@@ -106,6 +112,8 @@ Derived from the pyfepdf source at the pinned commit. Task 2 confirms each lette
 Field names do not change, so the visibility map (D3) and the verification (D2) are shared by both layouts. Only coordinates and label texts differ.
 
 The variant deliberately departs from the literal labels quoted in the schema descriptions ("Precio", "Cantidad"). If extraction depends on those labels, stage 3 will show it as a per-layout difference.
+
+**Confirmed by rendering (task 2.3):** labels "Cant.", "P. Unit." and "Importe Neto" (header + all 39 numbered item rows) swapped by mirroring the `Item.Precio*`/`Item.Importe*` x-coordinates. Rendering the spike Factura A on both layouts shows every value fully visible; "Importe Neto" sits snug against its column divider in the (now narrower) former Precio slot but no character is cut. No fallback to labels-only was needed.
 
 - **Alternative:** 3 layouts (PRD 02 R1.5), adding a moved header block. Rejected for this change: it adds editing time and little diagnostic value at n=30. It becomes a measured PRD 04 lever if stage 3 shows layout-dependent errors.
 
@@ -123,9 +131,15 @@ Rendered by the same engine and templates, so they differ from invoices only whe
 
 Negatives skip the field-by-field check, because their ground truth has no invoice. Their manifest `gt_check` is `null`, and review confirms the printed title.
 
+**Confirmed by rendering (task 3.3):** `tipo_cbte` 3/7/4/91 on `qr_base` print exactly "A Nota de Crédito", "B Nota de Débito", "A Recibo" and "R Remito" (letter + title), one page each, no exceptions. No deviations from this table.
+
+**Confirmed by rendering (task 2.4):** the presupuesto template removes the `AFIP_QR` row entirely (its image handler only draws `if text:`, so a missing field means `f.has_key("AFIP_QR")` is `False` and `GenerarQR` never runs — the safest way to suppress it, since `GenerarQR` calls `float(fact.get("moneda_ctz", 1))` and other AFIP-specific formatting that a non-fiscal document has no reason to trigger). `CAE`/`CAE.Vencimiento` are blanked by passing `cae=""`, `fch_venc_cae=""` to `CrearFactura` (both are `f.set` from the fact dict); the static labels `CAE.L`/`CAE.Vencimiento.L` are blanked in the CSV, since nothing else ever sets them. The title comes from `tipos_fact`, a lookup keyed by `tipo_cbte`; since no real code means "Presupuesto", the generator extends an instance copy (`fepdf.tipos_fact = dict(FEPDF.tipos_fact); fepdf.tipos_fact[(99,)] = "Presupuesto"`) and renders with `tipo_cbte=99`. Leaving `99` out of `letras_fact` gives the blank printed-letter box the spec calls for.
+
 ### D6 · Reproducibility
 
 - **Clean PDFs.** The generator fixes `fpdf`'s creation timestamp to a date derived from the case. The simplest pinning mechanism in the generator decides how: a subclass or a patch of the timestamp call. Nothing else in `fpdf` output depends on time or randomness; task 3 confirms it by rendering twice and comparing bytes.
+
+  **Confirmed by rendering (task 3.4):** `fpdf/fpdf.py` calls `datetime.now()` directly (`from datetime import datetime` at module scope) inside `_putinfo` to stamp `/CreationDate`; `datetime.now` cannot be monkeypatched in place (it is a built-in type), so the generator replaces the module-level name — `fpdf.fpdf.datetime = FixedDatetime`, a `datetime` subclass whose `now()` classmethod returns a fixed value — before calling `GenerarPDF`. Two renders of the same document with this patch in place are byte-identical (SHA-256 match); a control run without the patch, one second apart, produces different bytes, confirming `/CreationDate` is the only source of nondeterminism found.
 - **Degraded PDFs.** Pillow's PDF writer receives fixed `creationDate` and `modDate` values.
 - **Randomness.** One `random.Random(seed)` per case drives every random choice: parameters, rotation angle and sign, noise. Pillow's `effect_noise` is not seedable and is not used.
 - **Contract tiers** (spec: reproducible generation). Ground truth and clean PDFs are byte-identical. Degraded documents are pixel-identical under the recorded Pillow, pypdfium2 and libjpeg versions, because JPEG bytes can differ across libjpeg builds.
@@ -152,11 +166,17 @@ Add `moneda.L`, `moneda_id`/`moneda_ds`, `moneda_ctz.L` and `moneda_ctz` fields 
 
 E cases use `moneda_id` `DOL` (printed "USD: Dólar") or `060` ("EUR: Euro"), with a printed exchange rate. Ground truth is `currency` `USD`/`EUR` and `exchange_rate` as printed. For peso invoices the template leaves the fields empty, so `currency` stays `ARS` by convention and is skipped in verification.
 
+**Confirmed by rendering (task 2.2):** the new fields are `moneda.L`, `moneda_ds` (not `moneda_id`, which pyfepdf never sets to a display value) and `moneda_ctz.L`/`moneda_ctz`, placed at x=94.5–133mm, y=64–72.6mm (the free column beside "Período Facturado"/"Forma de Pago"). `moneda_ctz` must always be a float-parseable string (e.g. `"1"` for peso invoices), never `""`: `GenerarQR` calls `float(fact.get("moneda_ctz", 1))` unconditionally for the QR payload, regardless of what is displayed, and `.get` returns an explicit `""` rather than falling back to its default. Passing `moneda_id=""` alone (with `moneda_ctz` left numeric) correctly clears the four display fields to blank without raising.
+
 ### D9 · Manifest and case list
 
 - **Case list.** `tools/generate_invoices/cases.py` declares the 30 cases: id, seed, kind, letter, layout, tags, and flags like consumidor final, pages and currency. The generator reads nothing else. Seeds are `1001`–`1030` in id order. Prompt example seeds (PRD 04) use `9000+`, disjoint by construction.
 - **Manifest.** Written by the generator, except `reviewed_by`/`reviewed_at`. Those are filled after review, through a generator subcommand that records a review. Hand edits of JSONL are error-prone.
 - **Aggregation check.** A composition check (counts per kind, letter and layout; required tags; 4 degraded; 15/15 split) runs after generation and fails when the manifest does not match the spec composition.
+- **Provenance guard** (added 2026-09-15, task 6.5). `generate` refuses to run when `git status --porcelain` reports modified or untracked files under `tools/generate_invoices/`, and also when git status cannot be read.
+  - **Why:** the first dataset was generated from uncommitted code, and its manifest recorded `git_sha` `3d2d3ae`, a commit that does not contain the generator. A SHA only proves provenance if the tree matches it.
+  - **Alternative rejected:** recording `dirty: true`. It keeps the dataset, but that dataset cannot be regenerated from the repo.
+  - **Side effect:** regenerating overwrites the manifest, including `reviewed_by`/`reviewed_at`. Generation therefore has to be final before the human review (task 7.4) starts.
 
 Assignment of tags to cases (fixed in `cases.py`):
 

@@ -12,3 +12,6 @@ __pycache__/
 
 # Generator scratch output (the curated dataset lives in ground_truth/)
 tools/generate_invoices/out/
+
+# Real photographed set: personal/company data, never committed (D10)
+ground_truth_real/

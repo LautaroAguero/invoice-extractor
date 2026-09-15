@@ -14,6 +14,7 @@ This stage turns "it seems to work" into numbers. Running the baseline over the 
 - Persisted run records, so reports can be regenerated without calling the API.
 - A paired comparison of the two PDF ingestion paths.
 - A written failure analysis of the baseline.
+- A separate report section for the 2-document real set, outside every headline number.
 
 **Out**
 - Fixing what the analysis finds (PRD 04).
@@ -42,11 +43,12 @@ This stage turns "it seems to work" into numbers. Running the baseline over the 
 One command produces it, in the terminal and as markdown. It contains at least:
 
 ```
-DOCUMENTS            30   (in-domain n · not_an_invoice n)
+DOCUMENTS            30   (in-domain n · negatives n)
 Correct outcome      n/30  (xx.x%)  [95% CI]
   extraction rate    n/in-domain  (xx.x%)  [95% CI]
   false rejections   n
   correct rejections n
+    reason agreement n/correct rejections (xx.x%)   ← informative, not scored
   false acceptances  n                        ← always shown
 Invented values      n
 Missed values        n
@@ -71,6 +73,8 @@ LATENCY              p50 x.xs · p95 x.xs                (wall clock per documen
 - **R3.1** Every rate shows its n and a Wilson interval. No bare percentages.
 - **R3.2** The worst field is marked automatically.
 - **R3.3** A per-tag breakdown shows whether failures concentrate in the hard cases.
+- **R3.4 Reason agreement (negatives).** For each negative, `add-synthetic-dataset`'s manifest records an `expected_reason`. The report states how often the actual failure reason matches it, as its own line under "correct rejections" — informative only: a negative whose actual reason differs from `expected_reason` still counts as a correct rejection (PRD 02 spec: "Expected failure reason is informative, not scored").
+- **R3.5 Real-set section.** Documents with manifest `source` `real` (`ground_truth_real/`, 2 documents, `add-synthetic-dataset`) never enter the `DOCUMENTS 30` count or any rate above. The report gives them their own section — same field-precision shape, run over 2 documents — clearly labeled as not a headline number and too small for a confidence interval.
 
 ### R4 · Execution
 
@@ -98,6 +102,7 @@ LATENCY              p50 x.xs · p95 x.xs                (wall clock per documen
 - [ ] A spend cap stops a run and the partial run is marked incomplete (verified with a mocked client).
 - [ ] A paired comparison of path A vs path B exists with numbers and a stated winner.
 - [ ] `docs/failure-analysis.md` names the worst field and ranks hypotheses with evidence.
+- [ ] The report shows reason agreement for negatives, and a separate real-set section that no headline number includes.
 
 ## Risks
 

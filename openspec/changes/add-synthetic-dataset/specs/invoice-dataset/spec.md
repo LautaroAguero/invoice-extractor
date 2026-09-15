@@ -29,6 +29,10 @@ The generator version (git commit and pinned rendering dependency versions) SHAL
 - **WHEN** a degraded document is regenerated from its manifest seed with the recorded dependency versions
 - **THEN** its decoded pixels and its ground truth are identical to the committed files
 
+#### Scenario: Uncommitted generator code
+- **WHEN** generation is started while the generator directory has modified or untracked files
+- **THEN** generation is refused, the uncommitted files are listed, and no document or manifest is written
+
 ### Requirement: Generation fails loudly
 
 A rendering error SHALL abort generation of that document. The generator SHALL NOT write a document file or its ground truth when rendering or verification failed.

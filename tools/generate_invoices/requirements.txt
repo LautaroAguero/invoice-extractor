@@ -5,6 +5,10 @@
 #   python -m venv .venv
 #   .venv/Scripts/python -m pip install -r requirements.txt
 #   .venv/Scripts/python -m pip install --no-deps "git+https://github.com/reingart/pyafipws.git@d595b07"
+#
+# Generate the dataset: .venv/Scripts/python -m generator.cli generate
+# Record a review:      .venv/Scripts/python -m generator.cli review <doc_id> <reviewer>
+# Run the generator's own tests: .venv/Scripts/python -m pytest
 fpdf==1.7.2
 future==1.0.0
 httplib2==0.32.0
@@ -16,3 +20,8 @@ PySimpleSOAP @ git+https://github.com/pysimplesoap/pysimplesoap.git@31c85822dec5
 setuptools==84.0.0
 # Only used to sanity-check the text layer of generated PDFs.
 pypdf==6.18.1
+# Ground-truth verification (D2) and clean-PDF rasterization for degradation (D7).
+pdfplumber==0.11.10
+pypdfium2==5.13.0
+# Generator test suite (own venv; not the extractor's pytest).
+pytest==9.1.1

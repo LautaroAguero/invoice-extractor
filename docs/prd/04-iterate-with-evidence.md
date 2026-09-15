@@ -70,6 +70,14 @@ Each number links to, or can be regenerated from, a committed run record.
 - **R5.2 Batch API.** Run the dataset through the Message Batches API and compare measured cost and end-to-end time against the synchronous run.
 - **R5.3 Prompt caching.** Only if the fixed prefix (system prompt + schema + examples) is above the model's minimum cacheable size. Report the measured `cache_read_input_tokens` and the saving; if the prefix is too small, document that caching does not apply and why.
 
+### R6 · Candidate levers from PRD 02 dataset exploration
+
+Surfaced while building the generator (`add-synthetic-dataset`), not yet built. Each still needs a hypothesis and a run record (R3.2) before it counts as an iteration.
+
+- **A dedicated "IVA Contenido" field.** Ley 27.743 requires some Factura B tickets to print a VAT-included line; the synthetic generator's templates have no field for it (PRD 02 open questions), so it never appears in `ground_truth/`. If the real set (`ground_truth_real/`) or a future synthetic case shows it, a schema field is the candidate change — not a hidden rule inside `vat_amount`/`vat_breakdown`, which already have a fixed meaning (PRD 01 D8).
+- **FCE MiPyMEs as a negative.** `tipo_cbte` 201/206/211 (Factura de Crédito Electrónica) was scoped out of the 30 (PRD 02 open questions). A candidate `unsupported_document` negative once there is a hypothesis worth spending a document on.
+- **A third visual layout.** PRD 02 R1.5 reduced the layout count from 3 to 2 because a third added editing time without a clear diagnostic payoff at n=30 (design D4). If PRD 03's per-tag breakdown (R3.3) shows a layout-dependent error concentrated on one of the two, a third layout — moving the header block rather than just the item-table labels — is the targeted follow-up, not a blind re-run.
+
 ## Acceptance criteria
 
 - [ ] Validation implements ≥5 checks from R1, each with unit tests including a corrupted invoice.

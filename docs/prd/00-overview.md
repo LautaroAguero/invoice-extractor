@@ -15,7 +15,7 @@ A system that takes invoice documents and returns validated, structured objects.
 ## Non-goals
 
 - Production deployment, multi-tenant APIs, UIs.
-- Real invoices. The dataset is 100% synthetic (see Decisions).
+- Real invoices in the measured dataset. Headline metrics run on 30 synthetic documents (see Decisions); a small separate real set exists only to sanity-check the synthetic templates and is never mixed into the numbers (PRD 02 R6, `add-synthetic-dataset`).
 - Training or fine-tuning models.
 - Integration with ARCA/AFIP web services (no CAE validation against the real registry).
 
@@ -36,7 +36,7 @@ Stages are ordered on purpose. **Nothing gets "improved" before stage 3 can meas
 | Decision | Choice | Why | Revisit if |
 |---|---|---|---|
 | Domain | Argentine invoices (A, B, C, E) | Rich redundancies that can be checked deterministically: CUIT check digit, VAT rules per invoice type, items → net → VAT → total, CAE | — |
-| Data source | 100% synthetic, rendered with pyafipws `pyfepdf` | Ground truth by construction, publishable, no personal data | Headline precision is needed on real invoices |
+| Data source | 30 synthetic documents for every headline metric, rendered with pyafipws `pyfepdf`. A separate 2-document real set (`ground_truth_real/`, git-ignored, hand-annotated) is reported apart and never counted toward a headline number | Ground truth by construction, publishable, no personal data; the real set only sanity-checks that the synthetic templates match an actual document | Headline precision is needed on real invoices at a scale beyond 2 documents |
 | Repo language | English (code, schema, prompts, docs). Fiscal terms stay in Spanish inside field descriptions (CUIT, CAE, Responsable Inscripto) | Broad audience; the model must match the literal strings printed on the document | — |
 | Structured output level | Native structured outputs: Pydantic model schema via `output_config.format` (SDK `transform_schema`), response validated against the same model after checking `stop_reason` | Level 3 in course chapter 5: shape guaranteed by the API. Not `messages.parse`, which validates inside the call and loses usage on truncated or invalid output | — |
 | Generator isolation | `tools/generate_invoices/` has its own venv and requirements and is never imported by the extractor | pyafipws is GPL-3.0 and needs compatibility patches on Python 3.14 | — |
