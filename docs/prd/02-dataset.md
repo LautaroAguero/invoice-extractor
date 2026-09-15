@@ -94,4 +94,4 @@ Documents used as few-shot examples in prompts (PRD 04) are generated with seeds
 ## Open questions
 
 - ~~OQ-2.1 Nota de crédito in scope or negative~~ resolved 2026-09-14: **out of scope, as a negative**. Notas de crédito/débito and factura M expect a failure with reason `unsupported_document_type` (distinct from `not_an_invoice`). They are tagged `unsupported_document` and their manifest `expected_outcome` is `explicit_failure`.
-- **OQ-2.2** Do the JPG and no-text-layer cases count toward the 30, or are they extra variants of existing documents? Variants give a cleaner paired comparison of ingestion paths.
+- ~~OQ-2.2 JPG and no-text-layer cases: part of the 30 or extra variants~~ resolved 2026-09-15: **they count toward the 30** as documents of their own, not as variants of other documents. Consequence for PRD 03 R5: path B (local text extraction) cannot read them, so they are explicit failures for path B by design. The path comparison reports them in their own group instead of mixing them into per-field deltas.

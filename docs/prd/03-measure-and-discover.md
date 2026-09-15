@@ -76,9 +76,9 @@ LATENCY              p50 x.xs · p95 x.xs                (wall clock per documen
 
 ### R5 · Ingestion path comparison (course requirement 2)
 
-- **R5.1** Path A: PDF sent as a document block. Path B: text extracted locally from the PDF and sent as text.
-- **R5.2** Both paths run over the same documents; the comparison is paired (McNemar on per-document outcome, and per-field deltas).
-- **R5.3** For documents with no text layer, path B must end in an explicit failure, never in an extraction from empty text.
+- **R5.1** Path A: the PDF is sent as a document block, and JPG documents as image blocks. Path B: text is extracted locally with `pdfplumber` (`page.extract_text()`, default mode, all pages) and sent as text. There is no OCR: path B has no way to read an image.
+- **R5.2** Both paths run over the same documents. The comparison is paired: McNemar on per-document outcome, and per-field deltas over the documents both paths extracted.
+- **R5.3** For documents with no text layer (`skewed_scan`) and for JPG documents (`image_input`), path B must end in an explicit failure, never in an extraction from empty text. The report shows these documents as a separate group, because they measure coverage, not extraction quality.
 - **R5.4** The result table reports precision, invented values, cost/doc and p95 latency per path, and names the winner for this domain with its trade-off.
 
 ### R6 · Failure analysis
@@ -107,5 +107,16 @@ LATENCY              p50 x.xs · p95 x.xs                (wall clock per documen
 ## Open questions
 
 - ~~OQ-1 Measurement rules~~ resolved 2026-09-14 (1a, 2a, 3c, 4b, 5a) in [docs/measurement-rules.md](../measurement-rules.md). Items are matched by position; reconsider only through the change log if the failure analysis shows shift cascades.
-- **OQ-3.1** Which local library for path B (pypdf, pdfplumber, pymupdf)? Table extraction quality differs, and so does licensing (pymupdf is AGPL).
+- ~~OQ-3.1 Library for path B~~ resolved 2026-09-15: **pdfplumber** (MIT, on pdfminer.six, MIT). Evidence: a comparison on the spike Factura A (one document, one layout, so it picks a default rather than proving a winner). Checked: item rows kept whole on one line, key values present, accents intact.
+
+  | Library / mode | License | Rows intact | Key values | Chars |
+  |---|---|---|---|---|
+  | pypdf `extract_text()` | BSD-3 | 0/3 (columns emitted one after another) | 6/6 | 1,153 |
+  | pypdf `extraction_mode="layout"` | BSD-3 | 3/3 | 6/6 | 2,722 |
+  | **pdfplumber `extract_text()`** | MIT | **3/3** | 6/6 | **1,166** |
+  | pdfplumber `layout=True` | MIT | 3/3 | 6/6 | 5,396 |
+  | pypdfium2 `get_text_bounded()` | BSD-3/Apache-2.0 | 0/3 | 6/6 | 1,240 |
+  | pymupdf `get_text(sort=True)` | **AGPL-3.0** | 3/3 | 6/6 | 2,385 |
+
+  pdfplumber keeps rows together with the least text, which means fewer input tokens, and its license is compatible with any license for the extractor. It also offers `extract_tables()` if a later iteration needs it. pymupdf was the only one that split the overlapping "12.000,00 10,5%" cell cleanly, but AGPL rules it out. Every library except pymupdf merges that overlapping cell ("12.000,0010,5%3.780,00"), so it stays a real `dense_table` difficulty for path B. Switching library is a PRD 04 lever, and only through a measured run.
 - **OQ-3.2** How are the lists `vat_breakdown` and `other_taxes` scored? `measurement-rules.md` defines only `items` (§3), and leaf-field scoring (§2) does not cover lists. Options: by position like items, matched by rate/description, or as a multiset. Raised by the stage 1 schema (2026-09-14). **Must be decided through the measurement change log before the baseline run.**
