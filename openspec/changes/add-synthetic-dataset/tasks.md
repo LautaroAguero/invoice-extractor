@@ -38,6 +38,7 @@
 - [x] 6.3 Implement the composition check (30 documents; counts per kind, letter and layout; required tags; exactly 4 degraded; 15/15 split). Verify with generator tests that the real case list passes, and that a list with one case removed or one tag missing fails with a message.
 - [x] 6.4 Implement the review subcommand that sets `reviewed_by`/`reviewed_at` for one document and prints that document's `null` fields as a review checklist. Verify with a generator test on a temporary manifest.
 - [x] 6.5 Refuse `generate` when `tools/generate_invoices/` has uncommitted or untracked changes (design D9, provenance guard), so the manifest's `git_sha` always contains the generator. Verify with generator tests (clean tree passes, modified or untracked files and unreadable git status refuse, the CLI writes nothing), and by running `generate` on the dirty tree and seeing it refuse.
+- [x] 6.6 Split review into a read-only `checklist` subcommand (document and ground-truth paths, null fields, title check for negatives) and a `review` subcommand that only records, and add a launcher (`run_generator.py`) that runs the CLI from any working directory. Verify with generator tests: checklist leaves the manifest untouched, review records, an unknown id exits with an error, and the launcher runs from a different working directory.
 
 ## 7. Generate and review the dataset
 

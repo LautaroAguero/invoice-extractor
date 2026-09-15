@@ -6,8 +6,10 @@
 #   .venv/Scripts/python -m pip install -r requirements.txt
 #   .venv/Scripts/python -m pip install --no-deps "git+https://github.com/reingart/pyafipws.git@d595b07"
 #
-# Generate the dataset: .venv/Scripts/python -m generator.cli generate
-# Record a review:      .venv/Scripts/python -m generator.cli review <doc_id> <reviewer>
+# Run the generator CLI from any directory through the launcher (from the repo root):
+#   tools/generate_invoices/.venv/Scripts/python tools/generate_invoices/run_generator.py generate
+#   tools/generate_invoices/.venv/Scripts/python tools/generate_invoices/run_generator.py checklist <doc_id>
+#   tools/generate_invoices/.venv/Scripts/python tools/generate_invoices/run_generator.py review <doc_id> <reviewer>
 # Run the generator's own tests: .venv/Scripts/python -m pytest
 fpdf==1.7.2
 future==1.0.0

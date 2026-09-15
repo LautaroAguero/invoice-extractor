@@ -172,6 +172,12 @@ E cases use `moneda_id` `DOL` (printed "USD: Dólar") or `060` ("EUR: Euro"), wi
 
 - **Case list.** `tools/generate_invoices/cases.py` declares the 30 cases: id, seed, kind, letter, layout, tags, and flags like consumidor final, pages and currency. The generator reads nothing else. Seeds are `1001`–`1030` in id order. Prompt example seeds (PRD 04) use `9000+`, disjoint by construction.
 - **Manifest.** Written by the generator, except `reviewed_by`/`reviewed_at`. Those are filled after review, through a generator subcommand that records a review. Hand edits of JSONL are error-prone.
+- **Review flow** (task 6.6):
+  1. `checklist <id>` is read-only. It prints the document and ground-truth paths, the null fields to confirm are not printed, and, for negatives, the title check.
+  2. The reviewer compares the document against its ground truth.
+  3. `review <id> <reviewer>` only records who reviewed it and when.
+
+  An earlier version recorded first and printed the checklist afterwards, which let a review be recorded before anything was checked. `run_generator.py` runs the CLI from any directory, because `python -m generator.cli` only resolves inside `tools/generate_invoices/`.
 - **Aggregation check.** A composition check (counts per kind, letter and layout; required tags; 4 degraded; 15/15 split) runs after generation and fails when the manifest does not match the spec composition.
 - **Provenance guard** (added 2026-09-15, task 6.5). `generate` refuses to run when `git status --porcelain` reports modified or untracked files under `tools/generate_invoices/`, and also when git status cannot be read.
   - **Why:** the first dataset was generated from uncommitted code, and its manifest recorded `git_sha` `3d2d3ae`, a commit that does not contain the generator. A SHA only proves provenance if the tree matches it.

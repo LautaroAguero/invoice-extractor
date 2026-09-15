@@ -1,6 +1,9 @@
-"""Generates the 30-document dataset into `ground_truth/` (tasks.md 7.1).
+"""Generates the 30-document dataset into `ground_truth/` and records its human review (tasks.md 6.4/6.6/7.1).
 
-Usage: .venv/Scripts/python -m generator.cli generate [--out-dir ground_truth]
+Run from any directory through the launcher (`python -m generator.cli` only works inside tools/generate_invoices/):
+    tools/generate_invoices/.venv/Scripts/python tools/generate_invoices/run_generator.py generate
+    tools/generate_invoices/.venv/Scripts/python tools/generate_invoices/run_generator.py checklist A01
+    tools/generate_invoices/.venv/Scripts/python tools/generate_invoices/run_generator.py review A01 <reviewer>
 """
 
 from __future__ import annotations
@@ -154,7 +157,13 @@ def main(argv: list[str] | None = None) -> int:
     gen = sub.add_parser("generate", help="Generate the 30-document dataset")
     gen.add_argument("--out-dir", type=Path, default=DEFAULT_OUT_DIR)
 
-    review = sub.add_parser("review", help="Record a human review of one document")
+    checklist = sub.add_parser(
+        "checklist", help="Show what to check for one document before reviewing it (writes nothing)"
+    )
+    checklist.add_argument("doc_id")
+    checklist.add_argument("--out-dir", type=Path, default=DEFAULT_OUT_DIR)
+
+    review = sub.add_parser("review", help="Record that one document was reviewed (run checklist first)")
     review.add_argument("doc_id")
     review.add_argument("reviewer")
     review.add_argument("--out-dir", type=Path, default=DEFAULT_OUT_DIR)
@@ -174,11 +183,18 @@ def main(argv: list[str] | None = None) -> int:
         print(f"Generated {len(entries)} documents into {args.out_dir}")
         return 0
 
-    if args.command == "review":
-        from .review import print_checklist, record_review
+    if args.command in ("checklist", "review"):
+        from .review import ReviewError, build_checklist, format_checklist, record_review
 
-        checklist = record_review(args.out_dir / "manifest.jsonl", args.doc_id, args.reviewer, ground_truth_dir=args.out_dir)
-        print_checklist(args.doc_id, checklist)
+        try:
+            if args.command == "checklist":
+                print(format_checklist(build_checklist(args.out_dir, args.doc_id)))
+            else:
+                record_review(args.out_dir / "manifest.jsonl", args.doc_id, args.reviewer)
+                print(f"Recorded review of {args.doc_id} by {args.reviewer}")
+        except ReviewError as exc:
+            print(f"error: {exc}", file=sys.stderr)
+            return 1
         return 0
 
     return 1
