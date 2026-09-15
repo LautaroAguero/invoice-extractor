@@ -1,6 +1,8 @@
 import json
+import os
 from datetime import date
 from decimal import Decimal
+from pathlib import Path
 
 import anthropic
 import pytest
@@ -267,3 +269,24 @@ def test_spike_fixture_matches_printed_key_values(spike_payload):
     assert invoice.customer.cuit == "30687654311"
     assert (invoice.point_of_sale, invoice.invoice_number) == ("00003", "00001542")
     assert invoice.cae.number == "76321458963214"
+
+
+# --- schema snapshot ---------------------------------------------------------------------------
+
+SCHEMA_SNAPSHOT = Path(__file__).parent / "fixtures" / "extraction_result.schema.json"
+
+
+def test_schema_sent_to_the_api_matches_snapshot():
+    """The schema the model sees is part of every run's configuration.
+
+    A change here, whether from schema.py, pydantic or an SDK upgrade, is a lever that changes
+    results, so it must be deliberate. To accept a change, regenerate the snapshot and commit it
+    with the reason:
+        UPDATE_SCHEMA_SNAPSHOT=1 python -m pytest tests/test_schema.py -k snapshot
+    """
+    current = json.dumps(anthropic.transform_schema(ExtractionResult), indent=2, ensure_ascii=False) + "\n"
+    if os.environ.get("UPDATE_SCHEMA_SNAPSHOT") == "1":
+        SCHEMA_SNAPSHOT.write_text(current, encoding="utf-8")
+    assert current == SCHEMA_SNAPSHOT.read_text(encoding="utf-8"), (
+        "the transformed schema changed; see this test's docstring to accept it"
+    )

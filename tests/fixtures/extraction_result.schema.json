@@ -1,0 +1,524 @@
+{
+  "$defs": {
+    "Cae": {
+      "type": "object",
+      "description": "C.A.E. block printed at the bottom of the document (\"C.A.E. Nº ... Fecha Vto. CAE: ...\").",
+      "title": "Cae",
+      "properties": {
+        "number": {
+          "type": "string",
+          "description": "\"C.A.E. Nº\": the authorization code. Digits only, without hyphens or spaces, keeping leading zeros.",
+          "title": "Number"
+        },
+        "expiry_date": {
+          "type": "string",
+          "description": "\"Fecha Vto. CAE\" as an ISO date (YYYY-MM-DD).",
+          "title": "Expiry Date",
+          "format": "date"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "number",
+        "expiry_date"
+      ]
+    },
+    "Customer": {
+      "type": "object",
+      "description": "Receptor: the customer block (\"Sr.(s)\", \"Dirección\", \"IVA\", \"CUIT\"). A Factura B to a\nconsumidor final may print no name, CUIT or address; those fields are then null.",
+      "title": "Customer",
+      "properties": {
+        "name": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "\"Sr.(s)\": customer name or razón social. null when not printed on the document.",
+          "title": "Name"
+        },
+        "cuit": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "\"CUIT\" in the customer block. Digits only, without hyphens or spaces, keeping leading zeros. null when not printed on the document.",
+          "title": "Cuit"
+        },
+        "address": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "\"Dirección\" exactly as printed on that line. null when not printed on the document.",
+          "title": "Address"
+        },
+        "vat_condition": {
+          "type": "string",
+          "enum": [
+            "responsable_inscripto",
+            "sujeto_exento",
+            "consumidor_final",
+            "responsable_monotributo",
+            "sujeto_no_categorizado",
+            "proveedor_del_exterior",
+            "cliente_del_exterior",
+            "iva_liberado_ley_19640",
+            "monotributista_social",
+            "iva_no_alcanzado",
+            "monotributo_trabajador_independiente_promovido"
+          ],
+          "description": "Condición frente al IVA printed next to \"IVA\" in the customer block. Map the printed label to the value: \"IVA Responsable Inscripto\" -> responsable_inscripto, \"IVA Sujeto Exento\" -> sujeto_exento, \"Consumidor Final\" -> consumidor_final, \"Responsable Monotributo\" -> responsable_monotributo, \"Sujeto No Categorizado\" -> sujeto_no_categorizado, \"Proveedor del Exterior\" -> proveedor_del_exterior, \"Cliente del Exterior\" -> cliente_del_exterior, \"IVA Liberado - Ley N° 19.640\" -> iva_liberado_ley_19640, \"Monotributista Social\" -> monotributista_social, \"IVA No Alcanzado\" -> iva_no_alcanzado, \"Monotributo Trabajador Independiente Promovido\" -> monotributo_trabajador_independiente_promovido.",
+          "title": "Vat Condition"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "name",
+        "cuit",
+        "address",
+        "vat_condition"
+      ]
+    },
+    "Extracted": {
+      "type": "object",
+      "description": "The document is a supported invoice and every mandatory field is visible.",
+      "title": "Extracted",
+      "properties": {
+        "outcome": {
+          "type": "string",
+          "enum": [
+            "extracted"
+          ],
+          "description": "\"extracted\".",
+          "title": "Outcome"
+        },
+        "invoice": {
+          "$ref": "#/$defs/Invoice"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "outcome",
+        "invoice"
+      ]
+    },
+    "Failed": {
+      "type": "object",
+      "description": "No invoice can be extracted without guessing.",
+      "title": "Failed",
+      "properties": {
+        "outcome": {
+          "type": "string",
+          "enum": [
+            "failed"
+          ],
+          "description": "\"failed\".",
+          "title": "Outcome"
+        },
+        "reason": {
+          "type": "string",
+          "enum": [
+            "not_an_invoice",
+            "unsupported_document_type",
+            "illegible",
+            "missing_mandatory_data"
+          ],
+          "description": "not_an_invoice: the document is not a fiscal invoice (remito, presupuesto, any other document). unsupported_document_type: a fiscal document other than Factura A, B, C or E (Nota de Crédito, Nota de Débito, Factura M, recibo). illegible: the document cannot be read. missing_mandatory_data: a supported invoice where a mandatory value is not visible.",
+          "title": "Reason"
+        },
+        "detail": {
+          "type": "string",
+          "description": "Short explanation. For missing_mandatory_data, name each missing field by its path (for example cae.number).",
+          "title": "Detail"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "outcome",
+        "reason",
+        "detail"
+      ]
+    },
+    "Invoice": {
+      "type": "object",
+      "description": "An Argentine invoice (Factura A, B, C or E). Return only values that are visible on the\ndocument; optional values that are not printed are null, and are never computed or guessed.",
+      "title": "Invoice",
+      "properties": {
+        "invoice_type": {
+          "type": "string",
+          "enum": [
+            "A",
+            "B",
+            "C",
+            "E"
+          ],
+          "description": "Invoice letter printed in the box at the top center of the document (\"A\", \"B\", \"C\" or \"E\").",
+          "title": "Invoice Type"
+        },
+        "document_code": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "Digits of the comprobante code printed under the letter (\"COD.01\" -> \"01\"). null when not printed on the document.",
+          "title": "Document Code"
+        },
+        "point_of_sale": {
+          "type": "string",
+          "description": "Punto de venta: first part of the number printed after \"Nº\" (\"00003-00001542\" -> \"00003\"). Digits only, without hyphens or spaces, keeping leading zeros.",
+          "title": "Point Of Sale"
+        },
+        "invoice_number": {
+          "type": "string",
+          "description": "Número de comprobante: second part of that number (\"00003-00001542\" -> \"00001542\"). Digits only, without hyphens or spaces, keeping leading zeros.",
+          "title": "Invoice Number"
+        },
+        "issue_date": {
+          "type": "string",
+          "description": "Issue date printed as \"Fecha\", as an ISO date (YYYY-MM-DD). Not \"Fecha Vto. CAE\" and not \"Fecha de Vencimiento de Pago\".",
+          "title": "Issue Date",
+          "format": "date"
+        },
+        "due_date": {
+          "anyOf": [
+            {
+              "type": "string",
+              "format": "date"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "\"Fecha de Vencimiento de Pago\" as an ISO date (YYYY-MM-DD). null when not printed on the document.",
+          "title": "Due Date"
+        },
+        "issuer": {
+          "$ref": "#/$defs/Issuer"
+        },
+        "customer": {
+          "$ref": "#/$defs/Customer"
+        },
+        "currency": {
+          "type": "string",
+          "enum": [
+            "ARS",
+            "USD",
+            "EUR"
+          ],
+          "description": "Moneda of the invoice. \"ARS\" when the document shows no currency (invoices in pesos).",
+          "title": "Currency"
+        },
+        "exchange_rate": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "\"Cotización\" (tipo de cambio) of a foreign-currency invoice. null when not printed on the document. Decimal string: digits with a dot as decimal separator and no thousands separator (the document prints \"338.650,00\", return \"338650.00\").",
+          "title": "Exchange Rate"
+        },
+        "items": {
+          "type": "array",
+          "description": "Rows of the detail table, in document order. At least one.",
+          "title": "Items",
+          "items": {
+            "$ref": "#/$defs/Item"
+          },
+          "minItems": 1
+        },
+        "vat_breakdown": {
+          "type": "array",
+          "description": "One entry per \"IVA x%\" line in the totals area, in document order. Empty when none is printed.",
+          "title": "Vat Breakdown",
+          "items": {
+            "$ref": "#/$defs/VatLine"
+          }
+        },
+        "other_taxes": {
+          "type": "array",
+          "description": "One entry per other-tax line (tributos) in the totals area, in document order. Empty when none is printed.",
+          "title": "Other Taxes",
+          "items": {
+            "$ref": "#/$defs/OtherTax"
+          }
+        },
+        "net_amount": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "\"Neto\" (importe neto gravado). null when not printed on the document. Decimal string: digits with a dot as decimal separator and no thousands separator (the document prints \"338.650,00\", return \"338650.00\").",
+          "title": "Net Amount"
+        },
+        "non_taxed_amount": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "\"No Gravado\". null when not printed on the document. Decimal string: digits with a dot as decimal separator and no thousands separator (the document prints \"338.650,00\", return \"338650.00\").",
+          "title": "Non Taxed Amount"
+        },
+        "exempt_amount": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "\"Exento\". null when not printed on the document. Decimal string: digits with a dot as decimal separator and no thousands separator (the document prints \"338.650,00\", return \"338650.00\").",
+          "title": "Exempt Amount"
+        },
+        "vat_amount": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "Total VAT printed as a single amount. null when the document prints only per-rate \"IVA x%\" lines or no VAT. Decimal string: digits with a dot as decimal separator and no thousands separator (the document prints \"338.650,00\", return \"338650.00\").",
+          "title": "Vat Amount"
+        },
+        "total": {
+          "type": "string",
+          "description": "\"Total\" (importe total). Decimal string: digits with a dot as decimal separator and no thousands separator (the document prints \"338.650,00\", return \"338650.00\").",
+          "title": "Total"
+        },
+        "cae": {
+          "$ref": "#/$defs/Cae"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "invoice_type",
+        "document_code",
+        "point_of_sale",
+        "invoice_number",
+        "issue_date",
+        "due_date",
+        "issuer",
+        "customer",
+        "currency",
+        "exchange_rate",
+        "items",
+        "vat_breakdown",
+        "other_taxes",
+        "net_amount",
+        "non_taxed_amount",
+        "exempt_amount",
+        "vat_amount",
+        "total",
+        "cae"
+      ]
+    },
+    "Issuer": {
+      "type": "object",
+      "description": "Emisor: the business issuing the invoice, printed in the header of the document.",
+      "title": "Issuer",
+      "properties": {
+        "name": {
+          "type": "string",
+          "description": "Razón social of the issuer as printed in the header.",
+          "title": "Name"
+        },
+        "cuit": {
+          "type": "string",
+          "description": "\"CUIT\" of the issuer, printed like \"CUIT 30-71234567-1\". Digits only, without hyphens or spaces, keeping leading zeros. Not the \"IIBB\" number, even when it has the same digits.",
+          "title": "Cuit"
+        },
+        "vat_condition": {
+          "type": "string",
+          "enum": [
+            "responsable_inscripto",
+            "sujeto_exento",
+            "consumidor_final",
+            "responsable_monotributo",
+            "sujeto_no_categorizado",
+            "proveedor_del_exterior",
+            "cliente_del_exterior",
+            "iva_liberado_ley_19640",
+            "monotributista_social",
+            "iva_no_alcanzado",
+            "monotributo_trabajador_independiente_promovido"
+          ],
+          "description": "Condición frente al IVA of the issuer, printed in the header. Map the printed label to the value: \"IVA Responsable Inscripto\" -> responsable_inscripto, \"IVA Sujeto Exento\" -> sujeto_exento, \"Consumidor Final\" -> consumidor_final, \"Responsable Monotributo\" -> responsable_monotributo, \"Sujeto No Categorizado\" -> sujeto_no_categorizado, \"Proveedor del Exterior\" -> proveedor_del_exterior, \"Cliente del Exterior\" -> cliente_del_exterior, \"IVA Liberado - Ley N° 19.640\" -> iva_liberado_ley_19640, \"Monotributista Social\" -> monotributista_social, \"IVA No Alcanzado\" -> iva_no_alcanzado, \"Monotributo Trabajador Independiente Promovido\" -> monotributo_trabajador_independiente_promovido.",
+          "title": "Vat Condition"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "name",
+        "cuit",
+        "vat_condition"
+      ]
+    },
+    "Item": {
+      "type": "object",
+      "description": "One row of the detail table, in document order.",
+      "title": "Item",
+      "properties": {
+        "code": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "\"Articulo\" (product code) of the row. null when the row has none.",
+          "title": "Code"
+        },
+        "description": {
+          "type": "string",
+          "description": "\"Descripción\" of the row exactly as printed.",
+          "title": "Description"
+        },
+        "quantity": {
+          "type": "string",
+          "description": "\"Cantidad\" of the row. Decimal string: digits with a dot as decimal separator and no thousands separator (the document prints \"338.650,00\", return \"338650.00\").",
+          "title": "Quantity"
+        },
+        "unit_price": {
+          "type": "string",
+          "description": "\"Precio\" (unit price) of the row. Decimal string: digits with a dot as decimal separator and no thousands separator (the document prints \"338.650,00\", return \"338650.00\").",
+          "title": "Unit Price"
+        },
+        "discount": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "\"Bonif.\" amount of the row. null when the table has no \"Bonif.\" column. Decimal string: digits with a dot as decimal separator and no thousands separator (the document prints \"338.650,00\", return \"338650.00\").",
+          "title": "Discount"
+        },
+        "vat_rate": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "VAT rate percentage from the \"IVA\" column (\"21%\" -> \"21\", \"10,5%\" -> \"10.5\"). The column may show the row's VAT amount glued to the rate (\"21%31.500,00\"); return only the rate. null when the table has no \"IVA\" column (Factura B and C). Decimal string: digits with a dot as decimal separator and no thousands separator (the document prints \"338.650,00\", return \"338650.00\").",
+          "title": "Vat Rate"
+        },
+        "line_amount": {
+          "type": "string",
+          "description": "\"Importe\" of the row as printed. Decimal string: digits with a dot as decimal separator and no thousands separator (the document prints \"338.650,00\", return \"338650.00\").",
+          "title": "Line Amount"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "code",
+        "description",
+        "quantity",
+        "unit_price",
+        "discount",
+        "vat_rate",
+        "line_amount"
+      ]
+    },
+    "OtherTax": {
+      "type": "object",
+      "description": "One other-tax line of the totals area (tributos: percepciones, impuestos internos).",
+      "title": "OtherTax",
+      "properties": {
+        "description": {
+          "type": "string",
+          "description": "Label of the tax line exactly as printed.",
+          "title": "Description"
+        },
+        "amount": {
+          "type": "string",
+          "description": "Amount printed on that line. Decimal string: digits with a dot as decimal separator and no thousands separator (the document prints \"338.650,00\", return \"338650.00\").",
+          "title": "Amount"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "description",
+        "amount"
+      ]
+    },
+    "VatLine": {
+      "type": "object",
+      "description": "One \"IVA x%\" line of the totals area.",
+      "title": "VatLine",
+      "properties": {
+        "rate": {
+          "type": "string",
+          "description": "Rate from the line label (\"IVA 10,5%\" -> \"10.5\"). Decimal string: digits with a dot as decimal separator and no thousands separator (the document prints \"338.650,00\", return \"338650.00\").",
+          "title": "Rate"
+        },
+        "amount": {
+          "type": "string",
+          "description": "Amount printed on that line. Decimal string: digits with a dot as decimal separator and no thousands separator (the document prints \"338.650,00\", return \"338650.00\").",
+          "title": "Amount"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "rate",
+        "amount"
+      ]
+    }
+  },
+  "type": "object",
+  "description": "Result of extracting one document: an invoice, or an explicit failure. Never guess a value.",
+  "title": "ExtractionResult",
+  "properties": {
+    "result": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/Extracted"
+        },
+        {
+          "$ref": "#/$defs/Failed"
+        }
+      ],
+      "description": "Use \"extracted\" only when every mandatory value is visible; otherwise \"failed\" with a reason.",
+      "title": "Result"
+    }
+  },
+  "additionalProperties": false,
+  "required": [
+    "result"
+  ]
+}

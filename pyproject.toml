@@ -8,7 +8,9 @@ version = "0.1.0"
 description = "Extracts Argentine invoices into validated objects and measures its own reliability and cost."
 requires-python = ">=3.14"
 dependencies = [
-    "anthropic",
+    # Bounded: the schema design relies on how transform_schema behaves in 1.5 (schema.py
+    # notes). tests/test_schema.py snapshots the transformed schema; bump deliberately.
+    "anthropic>=1.5,<1.6",
     "pydantic>=2",
     "python-dotenv",
 ]

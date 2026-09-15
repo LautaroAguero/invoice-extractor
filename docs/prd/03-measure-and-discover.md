@@ -25,7 +25,7 @@ This stage turns "it seems to work" into numbers. Running the baseline over the 
 ### R1 · Run record
 
 - **R1.1** Every evaluation run writes a record to `runs/` containing:
-  - config: model ID, prompt version, schema hash, ingestion path, generator version, git SHA, timestamp;
+  - config: model ID, prompt version, schema hash (of the schema actually sent, after `anthropic.transform_schema`, not of the Pydantic source), `anthropic` and `pydantic` versions, ingestion path, generator version, git SHA, timestamp;
   - per document: prediction or typed failure, attempts, tokens (including cache and thinking-in-output), cost, latency;
   - aggregates.
 - **R1.2** The report is a pure function of a run record: `evaluate` and `report` are separable, and re-rendering a report never calls the model.
