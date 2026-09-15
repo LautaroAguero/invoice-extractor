@@ -55,7 +55,11 @@ FIELD PRECISION  (over successful extractions: N)
                                n/N    %      95% CI
   <field>                      ...
   items_exact                  ...
-  items_per_item               n/items  ...  (extra items n)
+  items_per_entry              n/entries ... (extra entries n)
+  vat_breakdown_exact          ...
+  vat_breakdown_per_entry      n/entries ... (extra entries n)
+  other_taxes_exact            ...
+  other_taxes_per_entry        n/entries ... (extra entries n)
   <worst field>                ...           ← worst field
 
 BY TAG                         (multi_page, foreign_currency, skewed_scan, ...)
@@ -90,7 +94,7 @@ LATENCY              p50 x.xs · p95 x.xs                (wall clock per documen
 - [ ] `docs/measurement-rules.md` exists and is committed before the baseline run record.
 - [ ] One command produces the report from the dataset. A second command re-renders it from a saved run record without network access.
 - [ ] Per-field precision and cost per document come from the run record, not estimates.
-- [ ] The report shows n and a 95% interval for every rate, the extraction rate next to field precision, and the invented, missed and extra-item counts.
+- [ ] The report shows n and a 95% interval for every rate, the extraction rate next to field precision, and the invented, missed and extra-entry counts.
 - [ ] A spend cap stops a run and the partial run is marked incomplete (verified with a mocked client).
 - [ ] A paired comparison of path A vs path B exists with numbers and a stated winner.
 - [ ] `docs/failure-analysis.md` names the worst field and ranks hypotheses with evidence.
@@ -119,4 +123,4 @@ LATENCY              p50 x.xs · p95 x.xs                (wall clock per documen
   | pymupdf `get_text(sort=True)` | **AGPL-3.0** | 3/3 | 6/6 | 2,385 |
 
   pdfplumber keeps rows together with the least text, which means fewer input tokens, and its license is compatible with any license for the extractor. It also offers `extract_tables()` if a later iteration needs it. pymupdf was the only one that split the overlapping "12.000,00 10,5%" cell cleanly, but AGPL rules it out. Every library except pymupdf merges that overlapping cell ("12.000,0010,5%3.780,00"), so it stays a real `dense_table` difficulty for path B. Switching library is a PRD 04 lever, and only through a measured run.
-- **OQ-3.2** How are the lists `vat_breakdown` and `other_taxes` scored? `measurement-rules.md` defines only `items` (§3), and leaf-field scoring (§2) does not cover lists. Options: by position like items, matched by rate/description, or as a multiset. Raised by the stage 1 schema (2026-09-14). **Must be decided through the measurement change log before the baseline run.**
+- ~~OQ-3.2 Scoring of `vat_breakdown` and `other_taxes`~~ resolved 2026-09-15: **by position, like items**, with the same exact and per-entry metrics. Recorded in the change log of [docs/measurement-rules.md](../measurement-rules.md) §3.

@@ -28,7 +28,7 @@ The report also shows, as separate lines, the counts of false rejections, false 
 
 The field-precision block is **always printed together with the extraction rate over in-domain documents**. Field precision alone hides failures: a system that fails more often can show higher field precision. The n of every field line makes the denominator visible (for example `24/28`).
 
-**Scored fields:** every leaf field of the result schema, with nested fields flattened (`issuer.cuit`, `cae.expiry_date`). Items are scored separately (§3).
+**Scored fields:** every leaf field of the result schema, with nested fields flattened (`issuer.cuit`, `cae.expiry_date`). Lists (`items`, `vat_breakdown`, `other_taxes`) are scored separately (§3).
 
 **A field is correct when** its normalized prediction equals its normalized ground truth (§4). For optional fields:
 
@@ -42,14 +42,18 @@ The field-precision block is **always printed together with the extraction rate 
 
 Consequence of 2a: optional fields that are usually absent score high by returning `null`. The **invented values** and **missed values** counts are always reported, next to field precision, to keep that visible.
 
-## 3. Items *(Decision 3c: both metrics)*
+## 3. Lists *(Decision 3c: both metrics; OQ-3.2: same rule for every list)*
 
-Items are matched **by position**: predicted item *i* against ground-truth item *i*, in document order. An item is correct when every one of its fields is correct under §2 and §4.
+The three lists of the schema are scored with the same rule: `items`, `vat_breakdown` and `other_taxes`.
 
-- **items_exact** (document level): the predicted list has the same length as the ground truth and every item is correct. Denominator: same as field precision.
-- **items_per_item** (item level): correct items / ground-truth items, summed over the documents in the field-precision denominator. Extra predicted items beyond the ground-truth length are reported as a separate **extra items** count.
+Entries are matched **by position**: predicted entry *i* against ground-truth entry *i*, in document order. An entry is correct when every one of its fields is correct under §2 and §4.
 
-Position matching means one skipped row makes every following item wrong. That is intended (a skipped row is a real extraction error), but if the failure analysis shows shift cascades dominating, matching by description is the first rule to reconsider, through the change log.
+For each list `<list>`:
+
+- **`<list>_exact`** (document level): the predicted list has the same length as the ground truth and every entry is correct. Two empty lists count as exact. Denominator: same as field precision.
+- **`<list>_per_entry`** (entry level): correct entries / ground-truth entries, summed over the documents in the field-precision denominator. Documents whose ground-truth list is empty add nothing to this denominator. Extra predicted entries beyond the ground-truth length are reported as a separate **extra entries** count per list. An extra entry on a document whose ground truth is empty counts as an extra entry (the `vat_breakdown` of a Factura B is the typical case).
+
+Position matching means one skipped row makes every following entry wrong. That is intended, because a skipped row is a real extraction error. For `vat_breakdown` it also means that returning the right lines in a different order (for example sorted by rate instead of printed order) counts as wrong. The schema asks for document order, so this is measured as an error too. The failure analysis (PRD 03 R6) labels **order-only mismatches** separately: same entries as the ground truth, different order. That keeps them distinguishable from misread values. If shift cascades or order-only mismatches dominate a list, matching by content (description for items and other taxes, rate for VAT lines) is the first rule to reconsider, through the change log.
 
 ## 4. Normalization and equality
 
@@ -81,3 +85,4 @@ Normalization is implemented once and unit-tested. Exact amount comparison appli
 | Date | Change | Reason |
 |---|---|---|
 | 2026-09-14 | Initial rules (decisions 1a, 2a, 3c, 4b, 5a) | — |
+| 2026-09-15 | §3 extended from `items` to every list: `vat_breakdown` and `other_taxes` are matched by position with the same exact and per-entry metrics; order-only mismatches labelled in the failure analysis | OQ-3.2: the stage 1 schema added two lists the rules did not cover. No baseline run exists yet, so nothing needs re-scoring |
