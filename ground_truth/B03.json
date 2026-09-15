@@ -1,0 +1,66 @@
+{
+  "result": {
+    "outcome": "extracted",
+    "invoice": {
+      "invoice_type": "B",
+      "document_code": "06",
+      "point_of_sale": "00005",
+      "invoice_number": "00005324",
+      "issue_date": "2026-08-24",
+      "due_date": "2026-09-23",
+      "issuer": {
+        "name": "Tecnored Patagonia S.A.",
+        "cuit": "30742990601",
+        "vat_condition": "responsable_inscripto"
+      },
+      "customer": {
+        "name": null,
+        "cuit": null,
+        "address": null,
+        "vat_condition": "consumidor_final"
+      },
+      "currency": "ARS",
+      "exchange_rate": null,
+      "items": [
+        {
+          "code": "HW-092",
+          "description": "Disco SSD 1TB",
+          "quantity": "1.00",
+          "unit_price": "71500.00",
+          "discount": "0.00",
+          "vat_rate": "10.5",
+          "line_amount": "71500.00"
+        },
+        {
+          "code": "HW-220",
+          "description": "Router dual band AX3000",
+          "quantity": "3.00",
+          "unit_price": "125600.00",
+          "discount": "0.00",
+          "vat_rate": "21",
+          "line_amount": "376800.00"
+        },
+        {
+          "code": "HW-118",
+          "description": "Cable de red categoria 6 (rollo 300m)",
+          "quantity": "4.00",
+          "unit_price": "147700.00",
+          "discount": "0.00",
+          "vat_rate": "10.5",
+          "line_amount": "590800.00"
+        }
+      ],
+      "vat_breakdown": [],
+      "other_taxes": [],
+      "net_amount": null,
+      "non_taxed_amount": "0.00",
+      "exempt_amount": "0.00",
+      "vat_amount": null,
+      "total": "1187769.50",
+      "cae": {
+        "number": "41261616782145",
+        "expiry_date": "2026-09-03"
+      }
+    }
+  }
+}

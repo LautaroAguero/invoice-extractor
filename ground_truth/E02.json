@@ -1,0 +1,57 @@
+{
+  "result": {
+    "outcome": "extracted",
+    "invoice": {
+      "invoice_type": "E",
+      "document_code": "19",
+      "point_of_sale": "00005",
+      "invoice_number": "00006725",
+      "issue_date": "2026-07-28",
+      "due_date": "2026-08-27",
+      "issuer": {
+        "name": "Tecnored Patagonia S.A.",
+        "cuit": "30076581785",
+        "vat_condition": "responsable_inscripto"
+      },
+      "customer": {
+        "name": "Tecnologia Patagonica S.R.L.",
+        "cuit": "30115505420",
+        "address": "Belgrano 890, Neuquen",
+        "vat_condition": "responsable_inscripto"
+      },
+      "currency": "EUR",
+      "exchange_rate": "950.5000",
+      "items": [
+        {
+          "code": "SRV-02",
+          "description": "Consultoria de infraestructura",
+          "quantity": "4.00",
+          "unit_price": "119800.00",
+          "discount": "0.00",
+          "vat_rate": null,
+          "line_amount": "479200.00"
+        },
+        {
+          "code": "HW-045",
+          "description": "Switch administrable 24 puertos",
+          "quantity": "5.00",
+          "unit_price": "52400.00",
+          "discount": "0.00",
+          "vat_rate": null,
+          "line_amount": "262000.00"
+        }
+      ],
+      "vat_breakdown": [],
+      "other_taxes": [],
+      "net_amount": null,
+      "non_taxed_amount": "0.00",
+      "exempt_amount": "0.00",
+      "vat_amount": null,
+      "total": "741200.00",
+      "cae": {
+        "number": "10325579286016",
+        "expiry_date": "2026-08-07"
+      }
+    }
+  }
+}

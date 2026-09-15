@@ -1,0 +1,66 @@
+{
+  "result": {
+    "outcome": "extracted",
+    "invoice": {
+      "invoice_type": "A",
+      "document_code": "01",
+      "point_of_sale": "00005",
+      "invoice_number": "00001499",
+      "issue_date": "2026-08-12",
+      "due_date": "2026-09-11",
+      "issuer": {
+        "name": "Tecnored Patagonia S.A.",
+        "cuit": "30092423804",
+        "vat_condition": "responsable_inscripto"
+      },
+      "customer": {
+        "name": "Comercial del Sur S.A.",
+        "cuit": "34079490069",
+        "address": "Ruta 3 Km 12, Bahia Blanca",
+        "vat_condition": "responsable_inscripto"
+      },
+      "currency": "ARS",
+      "exchange_rate": null,
+      "items": [
+        {
+          "code": "HW-045",
+          "description": "Switch administrable 24 puertos",
+          "quantity": "3.00",
+          "unit_price": "79600.00",
+          "discount": "0.00",
+          "vat_rate": "21",
+          "line_amount": "238800.00"
+        },
+        {
+          "code": "SRV-04",
+          "description": "Licencia anual de monitoreo",
+          "quantity": "1.00",
+          "unit_price": "84000.00",
+          "discount": "0.00",
+          "vat_rate": "10.5",
+          "line_amount": "84000.00"
+        }
+      ],
+      "vat_breakdown": [
+        {
+          "rate": "21",
+          "amount": "50148.00"
+        },
+        {
+          "rate": "10.5",
+          "amount": "8820.00"
+        }
+      ],
+      "other_taxes": [],
+      "net_amount": "322800.00",
+      "non_taxed_amount": "0.00",
+      "exempt_amount": "0.00",
+      "vat_amount": null,
+      "total": "381768.00",
+      "cae": {
+        "number": "40097176464064",
+        "expiry_date": "2026-08-22"
+      }
+    }
+  }
+}

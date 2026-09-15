@@ -1,0 +1,66 @@
+{
+  "result": {
+    "outcome": "extracted",
+    "invoice": {
+      "invoice_type": "C",
+      "document_code": "11",
+      "point_of_sale": "00005",
+      "invoice_number": "00009887",
+      "issue_date": "2026-02-07",
+      "due_date": "2026-03-09",
+      "issuer": {
+        "name": "Tecnored Patagonia S.A.",
+        "cuit": "30695168159",
+        "vat_condition": "responsable_inscripto"
+      },
+      "customer": {
+        "name": "Comercial del Sur S.A.",
+        "cuit": "33047465120",
+        "address": "Ruta 3 Km 12, Bahia Blanca",
+        "vat_condition": "responsable_inscripto"
+      },
+      "currency": "ARS",
+      "exchange_rate": null,
+      "items": [
+        {
+          "code": "SRV-02",
+          "description": "Consultoria de infraestructura",
+          "quantity": "5.00",
+          "unit_price": "114800.00",
+          "discount": "0.00",
+          "vat_rate": null,
+          "line_amount": "574000.00"
+        },
+        {
+          "code": "SRV-05",
+          "description": "Migracion de base de datos",
+          "quantity": "4.00",
+          "unit_price": "98200.00",
+          "discount": "0.00",
+          "vat_rate": null,
+          "line_amount": "392800.00"
+        },
+        {
+          "code": "SRV-03",
+          "description": "Mantenimiento preventivo de servidores",
+          "quantity": "4.00",
+          "unit_price": "104500.00",
+          "discount": "0.00",
+          "vat_rate": null,
+          "line_amount": "418000.00"
+        }
+      ],
+      "vat_breakdown": [],
+      "other_taxes": [],
+      "net_amount": null,
+      "non_taxed_amount": "0.00",
+      "exempt_amount": "0.00",
+      "vat_amount": null,
+      "total": "1590474.00",
+      "cae": {
+        "number": "21138823611959",
+        "expiry_date": "2026-02-17"
+      }
+    }
+  }
+}

@@ -1,0 +1,228 @@
+{
+  "result": {
+    "outcome": "extracted",
+    "invoice": {
+      "invoice_type": "A",
+      "document_code": "01",
+      "point_of_sale": "00005",
+      "invoice_number": "00008084",
+      "issue_date": "2026-04-22",
+      "due_date": "2026-05-22",
+      "issuer": {
+        "name": "Tecnored Patagonia S.A.",
+        "cuit": "30198833505",
+        "vat_condition": "responsable_inscripto"
+      },
+      "customer": {
+        "name": "Comercial del Sur S.A.",
+        "cuit": "34518302029",
+        "address": "Ruta 3 Km 12, Bahia Blanca",
+        "vat_condition": "responsable_inscripto"
+      },
+      "currency": "ARS",
+      "exchange_rate": null,
+      "items": [
+        {
+          "code": "SRV-04",
+          "description": "Licencia anual de monitoreo",
+          "quantity": "4.00",
+          "unit_price": "149100.00",
+          "discount": "0.00",
+          "vat_rate": "21",
+          "line_amount": "596400.00"
+        },
+        {
+          "code": "HW-118",
+          "description": "Cable de red categoria 6 (rollo 300m)",
+          "quantity": "3.00",
+          "unit_price": "106500.00",
+          "discount": "0.00",
+          "vat_rate": "21",
+          "line_amount": "319500.00"
+        },
+        {
+          "code": "HW-092",
+          "description": "Disco SSD 1TB",
+          "quantity": "2.00",
+          "unit_price": "141600.00",
+          "discount": "0.00",
+          "vat_rate": "21",
+          "line_amount": "283200.00"
+        },
+        {
+          "code": "HW-045",
+          "description": "Switch administrable 24 puertos",
+          "quantity": "4.00",
+          "unit_price": "79200.00",
+          "discount": "0.00",
+          "vat_rate": "10.5",
+          "line_amount": "316800.00"
+        },
+        {
+          "code": "SRV-01",
+          "description": "Soporte tecnico mensual",
+          "quantity": "1.00",
+          "unit_price": "123300.00",
+          "discount": "0.00",
+          "vat_rate": "21",
+          "line_amount": "123300.00"
+        },
+        {
+          "code": "SRV-05",
+          "description": "Migracion de base de datos",
+          "quantity": "4.00",
+          "unit_price": "132800.00",
+          "discount": "0.00",
+          "vat_rate": "10.5",
+          "line_amount": "531200.00"
+        },
+        {
+          "code": "SRV-02",
+          "description": "Consultoria de infraestructura",
+          "quantity": "4.00",
+          "unit_price": "132100.00",
+          "discount": "0.00",
+          "vat_rate": "10.5",
+          "line_amount": "528400.00"
+        },
+        {
+          "code": "SRV-03",
+          "description": "Mantenimiento preventivo de servidores",
+          "quantity": "4.00",
+          "unit_price": "66900.00",
+          "discount": "0.00",
+          "vat_rate": "21",
+          "line_amount": "267600.00"
+        },
+        {
+          "code": "HW-220",
+          "description": "Router dual band AX3000",
+          "quantity": "4.00",
+          "unit_price": "63400.00",
+          "discount": "0.00",
+          "vat_rate": "21",
+          "line_amount": "253600.00"
+        },
+        {
+          "code": "LIB-07",
+          "description": "Manual de configuracion impreso",
+          "quantity": "4.00",
+          "unit_price": "67700.00",
+          "discount": "0.00",
+          "vat_rate": "21",
+          "line_amount": "270800.00"
+        },
+        {
+          "code": "SRV-04",
+          "description": "Licencia anual de monitoreo",
+          "quantity": "1.00",
+          "unit_price": "97400.00",
+          "discount": "0.00",
+          "vat_rate": "21",
+          "line_amount": "97400.00"
+        },
+        {
+          "code": "HW-118",
+          "description": "Cable de red categoria 6 (rollo 300m)",
+          "quantity": "5.00",
+          "unit_price": "86500.00",
+          "discount": "0.00",
+          "vat_rate": "21",
+          "line_amount": "432500.00"
+        },
+        {
+          "code": "HW-092",
+          "description": "Disco SSD 1TB",
+          "quantity": "5.00",
+          "unit_price": "83300.00",
+          "discount": "0.00",
+          "vat_rate": "21",
+          "line_amount": "416500.00"
+        },
+        {
+          "code": "HW-045",
+          "description": "Switch administrable 24 puertos",
+          "quantity": "3.00",
+          "unit_price": "95100.00",
+          "discount": "0.00",
+          "vat_rate": "10.5",
+          "line_amount": "285300.00"
+        },
+        {
+          "code": "SRV-01",
+          "description": "Soporte tecnico mensual",
+          "quantity": "4.00",
+          "unit_price": "93700.00",
+          "discount": "0.00",
+          "vat_rate": "21",
+          "line_amount": "374800.00"
+        },
+        {
+          "code": "SRV-05",
+          "description": "Migracion de base de datos",
+          "quantity": "4.00",
+          "unit_price": "149800.00",
+          "discount": "0.00",
+          "vat_rate": "10.5",
+          "line_amount": "599200.00"
+        },
+        {
+          "code": "SRV-02",
+          "description": "Consultoria de infraestructura",
+          "quantity": "5.00",
+          "unit_price": "60100.00",
+          "discount": "0.00",
+          "vat_rate": "10.5",
+          "line_amount": "300500.00"
+        },
+        {
+          "code": "SRV-03",
+          "description": "Mantenimiento preventivo de servidores",
+          "quantity": "4.00",
+          "unit_price": "92000.00",
+          "discount": "0.00",
+          "vat_rate": "21",
+          "line_amount": "368000.00"
+        },
+        {
+          "code": "HW-220",
+          "description": "Router dual band AX3000",
+          "quantity": "3.00",
+          "unit_price": "147100.00",
+          "discount": "0.00",
+          "vat_rate": "21",
+          "line_amount": "441300.00"
+        },
+        {
+          "code": "LIB-07",
+          "description": "Manual de configuracion impreso",
+          "quantity": "2.00",
+          "unit_price": "94400.00",
+          "discount": "0.00",
+          "vat_rate": "10.5",
+          "line_amount": "188800.00"
+        }
+      ],
+      "vat_breakdown": [
+        {
+          "rate": "21",
+          "amount": "891429.00"
+        },
+        {
+          "rate": "10.5",
+          "amount": "288771.00"
+        }
+      ],
+      "other_taxes": [],
+      "net_amount": "6995100.00",
+      "non_taxed_amount": "0.00",
+      "exempt_amount": "0.00",
+      "vat_amount": null,
+      "total": "8175300.00",
+      "cae": {
+        "number": "90134111687572",
+        "expiry_date": "2026-05-02"
+      }
+    }
+  }
+}

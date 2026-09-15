@@ -1,0 +1,7 @@
+{
+  "result": {
+    "outcome": "failed",
+    "reason": "unsupported_document_type",
+    "detail": "Recibo is not a supported invoice."
+  }
+}

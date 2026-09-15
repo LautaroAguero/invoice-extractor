@@ -1,0 +1,62 @@
+{
+  "result": {
+    "outcome": "extracted",
+    "invoice": {
+      "invoice_type": "A",
+      "document_code": "01",
+      "point_of_sale": "00005",
+      "invoice_number": "00007192",
+      "issue_date": "2026-05-18",
+      "due_date": "2026-06-17",
+      "issuer": {
+        "name": "Tecnored Patagonia S.A.",
+        "cuit": "30751102913",
+        "vat_condition": "responsable_inscripto"
+      },
+      "customer": {
+        "name": "Grupo Cuyo Comercial S.R.L.",
+        "cuit": "33085437289",
+        "address": "San Juan 234, San Rafael",
+        "vat_condition": "responsable_inscripto"
+      },
+      "currency": "ARS",
+      "exchange_rate": null,
+      "items": [
+        {
+          "code": "HW-118",
+          "description": "Cable de red categoria 6 (rollo 300m)",
+          "quantity": "2.00",
+          "unit_price": "88100.00",
+          "discount": "0.00",
+          "vat_rate": "21",
+          "line_amount": "176200.00"
+        },
+        {
+          "code": "HW-045",
+          "description": "Switch administrable 24 puertos",
+          "quantity": "2.00",
+          "unit_price": "145100.00",
+          "discount": "0.00",
+          "vat_rate": "21",
+          "line_amount": "290200.00"
+        }
+      ],
+      "vat_breakdown": [
+        {
+          "rate": "21",
+          "amount": "97944.00"
+        }
+      ],
+      "other_taxes": [],
+      "net_amount": "466400.00",
+      "non_taxed_amount": "0.00",
+      "exempt_amount": "0.00",
+      "vat_amount": null,
+      "total": "564344.00",
+      "cae": {
+        "number": "84527579565956",
+        "expiry_date": "2026-05-28"
+      }
+    }
+  }
+}

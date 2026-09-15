@@ -1,0 +1,66 @@
+{
+  "result": {
+    "outcome": "extracted",
+    "invoice": {
+      "invoice_type": "B",
+      "document_code": "06",
+      "point_of_sale": "00005",
+      "invoice_number": "00002399",
+      "issue_date": "2026-05-08",
+      "due_date": "2026-06-07",
+      "issuer": {
+        "name": "Tecnored Patagonia S.A.",
+        "cuit": "30631541441",
+        "vat_condition": "responsable_inscripto"
+      },
+      "customer": {
+        "name": "Distribuidora Los Andes S.R.L.",
+        "cuit": "34478697955",
+        "address": "Av. San Martin 1234, Mendoza",
+        "vat_condition": "responsable_inscripto"
+      },
+      "currency": "ARS",
+      "exchange_rate": null,
+      "items": [
+        {
+          "code": "HW-045",
+          "description": "Switch administrable 24 puertos",
+          "quantity": "2.00",
+          "unit_price": "101300.00",
+          "discount": "0.00",
+          "vat_rate": null,
+          "line_amount": "202600.00"
+        },
+        {
+          "code": "LIB-07",
+          "description": "Manual de configuracion impreso",
+          "quantity": "2.00",
+          "unit_price": "95000.00",
+          "discount": "0.00",
+          "vat_rate": null,
+          "line_amount": "190000.00"
+        },
+        {
+          "code": "HW-220",
+          "description": "Router dual band AX3000",
+          "quantity": "3.00",
+          "unit_price": "64700.00",
+          "discount": "0.00",
+          "vat_rate": null,
+          "line_amount": "194100.00"
+        }
+      ],
+      "vat_breakdown": [],
+      "other_taxes": [],
+      "net_amount": null,
+      "non_taxed_amount": "0.00",
+      "exempt_amount": "0.00",
+      "vat_amount": null,
+      "total": "709907.00",
+      "cae": {
+        "number": "76641174080938",
+        "expiry_date": "2026-05-18"
+      }
+    }
+  }
+}

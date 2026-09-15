@@ -1,0 +1,57 @@
+{
+  "result": {
+    "outcome": "extracted",
+    "invoice": {
+      "invoice_type": "B",
+      "document_code": "06",
+      "point_of_sale": "00005",
+      "invoice_number": "00006008",
+      "issue_date": "2026-04-08",
+      "due_date": "2026-05-08",
+      "issuer": {
+        "name": "Tecnored Patagonia S.A.",
+        "cuit": "30685821571",
+        "vat_condition": "responsable_inscripto"
+      },
+      "customer": {
+        "name": null,
+        "cuit": null,
+        "address": null,
+        "vat_condition": "consumidor_final"
+      },
+      "currency": "ARS",
+      "exchange_rate": null,
+      "items": [
+        {
+          "code": "SRV-01",
+          "description": "Soporte tecnico mensual",
+          "quantity": "2.00",
+          "unit_price": "60500.00",
+          "discount": "0.00",
+          "vat_rate": "10.5",
+          "line_amount": "121000.00"
+        },
+        {
+          "code": "SRV-03",
+          "description": "Mantenimiento preventivo de servidores",
+          "quantity": "3.00",
+          "unit_price": "84700.00",
+          "discount": "0.00",
+          "vat_rate": "10.5",
+          "line_amount": "254100.00"
+        }
+      ],
+      "vat_breakdown": [],
+      "other_taxes": [],
+      "net_amount": null,
+      "non_taxed_amount": "0.00",
+      "exempt_amount": "0.00",
+      "vat_amount": null,
+      "total": "414485.50",
+      "cae": {
+        "number": "65439540723349",
+        "expiry_date": "2026-04-18"
+      }
+    }
+  }
+}

@@ -1,0 +1,75 @@
+{
+  "result": {
+    "outcome": "extracted",
+    "invoice": {
+      "invoice_type": "B",
+      "document_code": "06",
+      "point_of_sale": "00005",
+      "invoice_number": "00001611",
+      "issue_date": "2026-04-08",
+      "due_date": "2026-05-08",
+      "issuer": {
+        "name": "Tecnored Patagonia S.A.",
+        "cuit": "30421746911",
+        "vat_condition": "responsable_inscripto"
+      },
+      "customer": {
+        "name": "Tecnologia Patagonica S.R.L.",
+        "cuit": "30169570724",
+        "address": "Belgrano 890, Neuquen",
+        "vat_condition": "responsable_inscripto"
+      },
+      "currency": "ARS",
+      "exchange_rate": null,
+      "items": [
+        {
+          "code": "SRV-02",
+          "description": "Consultoria de infraestructura",
+          "quantity": "3.00",
+          "unit_price": "138800.00",
+          "discount": "0.00",
+          "vat_rate": null,
+          "line_amount": "416400.00"
+        },
+        {
+          "code": "HW-092",
+          "description": "Disco SSD 1TB",
+          "quantity": "2.00",
+          "unit_price": "100800.00",
+          "discount": "0.00",
+          "vat_rate": null,
+          "line_amount": "201600.00"
+        },
+        {
+          "code": "HW-220",
+          "description": "Router dual band AX3000",
+          "quantity": "2.00",
+          "unit_price": "92000.00",
+          "discount": "0.00",
+          "vat_rate": null,
+          "line_amount": "184000.00"
+        },
+        {
+          "code": "SRV-04",
+          "description": "Licencia anual de monitoreo",
+          "quantity": "3.00",
+          "unit_price": "81800.00",
+          "discount": "0.00",
+          "vat_rate": null,
+          "line_amount": "245400.00"
+        }
+      ],
+      "vat_breakdown": [],
+      "other_taxes": [],
+      "net_amount": null,
+      "non_taxed_amount": "0.00",
+      "exempt_amount": "0.00",
+      "vat_amount": null,
+      "total": "1223632.00",
+      "cae": {
+        "number": "97602252225203",
+        "expiry_date": "2026-04-18"
+      }
+    }
+  }
+}

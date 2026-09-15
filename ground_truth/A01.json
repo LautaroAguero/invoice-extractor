@@ -1,0 +1,84 @@
+{
+  "result": {
+    "outcome": "extracted",
+    "invoice": {
+      "invoice_type": "A",
+      "document_code": "01",
+      "point_of_sale": "00005",
+      "invoice_number": "00002723",
+      "issue_date": "2026-07-27",
+      "due_date": "2026-08-26",
+      "issuer": {
+        "name": "Tecnored Patagonia S.A.",
+        "cuit": "30031862651",
+        "vat_condition": "responsable_inscripto"
+      },
+      "customer": {
+        "name": "Grupo Cuyo Comercial S.R.L.",
+        "cuit": "34693900796",
+        "address": "San Juan 234, San Rafael",
+        "vat_condition": "responsable_inscripto"
+      },
+      "currency": "ARS",
+      "exchange_rate": null,
+      "items": [
+        {
+          "code": "HW-220",
+          "description": "Router dual band AX3000",
+          "quantity": "1.00",
+          "unit_price": "138300.00",
+          "discount": "0.00",
+          "vat_rate": "10.5",
+          "line_amount": "138300.00"
+        },
+        {
+          "code": "SRV-03",
+          "description": "Mantenimiento preventivo de servidores",
+          "quantity": "4.00",
+          "unit_price": "110700.00",
+          "discount": "0.00",
+          "vat_rate": "21",
+          "line_amount": "442800.00"
+        },
+        {
+          "code": "SRV-04",
+          "description": "Licencia anual de monitoreo",
+          "quantity": "5.00",
+          "unit_price": "106900.00",
+          "discount": "0.00",
+          "vat_rate": "10.5",
+          "line_amount": "534500.00"
+        },
+        {
+          "code": "SRV-05",
+          "description": "Migracion de base de datos",
+          "quantity": "1.00",
+          "unit_price": "81300.00",
+          "discount": "0.00",
+          "vat_rate": "10.5",
+          "line_amount": "81300.00"
+        }
+      ],
+      "vat_breakdown": [
+        {
+          "rate": "10.5",
+          "amount": "79180.50"
+        },
+        {
+          "rate": "21",
+          "amount": "92988.00"
+        }
+      ],
+      "other_taxes": [],
+      "net_amount": "1196900.00",
+      "non_taxed_amount": "0.00",
+      "exempt_amount": "0.00",
+      "vat_amount": null,
+      "total": "1369068.50",
+      "cae": {
+        "number": "70219306953287",
+        "expiry_date": "2026-08-06"
+      }
+    }
+  }
+}

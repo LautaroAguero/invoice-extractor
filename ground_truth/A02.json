@@ -1,0 +1,66 @@
+{
+  "result": {
+    "outcome": "extracted",
+    "invoice": {
+      "invoice_type": "A",
+      "document_code": "01",
+      "point_of_sale": "00005",
+      "invoice_number": "00001660",
+      "issue_date": "2026-05-18",
+      "due_date": "2026-06-17",
+      "issuer": {
+        "name": "Tecnored Patagonia S.A.",
+        "cuit": "30963224725",
+        "vat_condition": "responsable_inscripto"
+      },
+      "customer": {
+        "name": "Grupo Cuyo Comercial S.R.L.",
+        "cuit": "34168033062",
+        "address": "San Juan 234, San Rafael",
+        "vat_condition": "responsable_inscripto"
+      },
+      "currency": "ARS",
+      "exchange_rate": null,
+      "items": [
+        {
+          "code": "SRV-01",
+          "description": "Soporte tecnico mensual",
+          "quantity": "1.00",
+          "unit_price": "142200.00",
+          "discount": "0.00",
+          "vat_rate": "10.5",
+          "line_amount": "142200.00"
+        },
+        {
+          "code": "SRV-02",
+          "description": "Consultoria de infraestructura",
+          "quantity": "5.00",
+          "unit_price": "79600.00",
+          "discount": "0.00",
+          "vat_rate": "21",
+          "line_amount": "398000.00"
+        }
+      ],
+      "vat_breakdown": [
+        {
+          "rate": "10.5",
+          "amount": "14931.00"
+        },
+        {
+          "rate": "21",
+          "amount": "83580.00"
+        }
+      ],
+      "other_taxes": [],
+      "net_amount": "540200.00",
+      "non_taxed_amount": "0.00",
+      "exempt_amount": "0.00",
+      "vat_amount": null,
+      "total": "638711.00",
+      "cae": {
+        "number": "71165929617188",
+        "expiry_date": "2026-05-28"
+      }
+    }
+  }
+}

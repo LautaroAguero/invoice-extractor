@@ -1,0 +1,66 @@
+{
+  "result": {
+    "outcome": "extracted",
+    "invoice": {
+      "invoice_type": "A",
+      "document_code": "01",
+      "point_of_sale": "00005",
+      "invoice_number": "00004355",
+      "issue_date": "2026-05-08",
+      "due_date": "2026-06-07",
+      "issuer": {
+        "name": "Tecnored Patagonia S.A.",
+        "cuit": "30686945827",
+        "vat_condition": "responsable_inscripto"
+      },
+      "customer": {
+        "name": "Insumos del Litoral S.A.",
+        "cuit": "30955309045",
+        "address": "Bv. Pellegrini 456, Santa Fe",
+        "vat_condition": "responsable_inscripto"
+      },
+      "currency": "ARS",
+      "exchange_rate": null,
+      "items": [
+        {
+          "code": "SRV-05",
+          "description": "Migracion de base de datos",
+          "quantity": "4.00",
+          "unit_price": "70900.00",
+          "discount": "0.00",
+          "vat_rate": "10.5",
+          "line_amount": "283600.00"
+        },
+        {
+          "code": "HW-045",
+          "description": "Switch administrable 24 puertos",
+          "quantity": "3.00",
+          "unit_price": "146900.00",
+          "discount": "0.00",
+          "vat_rate": "21",
+          "line_amount": "440700.00"
+        }
+      ],
+      "vat_breakdown": [
+        {
+          "rate": "10.5",
+          "amount": "29778.00"
+        },
+        {
+          "rate": "21",
+          "amount": "92547.00"
+        }
+      ],
+      "other_taxes": [],
+      "net_amount": "724300.00",
+      "non_taxed_amount": "0.00",
+      "exempt_amount": "0.00",
+      "vat_amount": null,
+      "total": "846625.00",
+      "cae": {
+        "number": "54697775849105",
+        "expiry_date": "2026-05-18"
+      }
+    }
+  }
+}

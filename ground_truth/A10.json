@@ -1,0 +1,75 @@
+{
+  "result": {
+    "outcome": "extracted",
+    "invoice": {
+      "invoice_type": "A",
+      "document_code": "01",
+      "point_of_sale": "00005",
+      "invoice_number": "00000460",
+      "issue_date": "2026-06-25",
+      "due_date": "2026-07-25",
+      "issuer": {
+        "name": "Tecnored Patagonia S.A.",
+        "cuit": "30938166621",
+        "vat_condition": "responsable_inscripto"
+      },
+      "customer": {
+        "name": "Comercial del Sur S.A.",
+        "cuit": "33318854926",
+        "address": "Ruta 3 Km 12, Bahia Blanca",
+        "vat_condition": "responsable_inscripto"
+      },
+      "currency": "ARS",
+      "exchange_rate": null,
+      "items": [
+        {
+          "code": "SRV-05",
+          "description": "Migracion de base de datos",
+          "quantity": "2.00",
+          "unit_price": "101700.00",
+          "discount": "0.00",
+          "vat_rate": "21",
+          "line_amount": "203400.00"
+        },
+        {
+          "code": "HW-118",
+          "description": "Cable de red categoria 6 (rollo 300m)",
+          "quantity": "1.00",
+          "unit_price": "69500.00",
+          "discount": "0.00",
+          "vat_rate": "10.5",
+          "line_amount": "69500.00"
+        },
+        {
+          "code": "SRV-02",
+          "description": "Consultoria de infraestructura",
+          "quantity": "1.00",
+          "unit_price": "121700.00",
+          "discount": "0.00",
+          "vat_rate": "21",
+          "line_amount": "121700.00"
+        }
+      ],
+      "vat_breakdown": [
+        {
+          "rate": "21",
+          "amount": "68271.00"
+        },
+        {
+          "rate": "10.5",
+          "amount": "7297.50"
+        }
+      ],
+      "other_taxes": [],
+      "net_amount": "394600.00",
+      "non_taxed_amount": "0.00",
+      "exempt_amount": "0.00",
+      "vat_amount": null,
+      "total": "470168.50",
+      "cae": {
+        "number": "28099904331349",
+        "expiry_date": "2026-07-05"
+      }
+    }
+  }
+}

@@ -1,0 +1,84 @@
+{
+  "result": {
+    "outcome": "extracted",
+    "invoice": {
+      "invoice_type": "A",
+      "document_code": "01",
+      "point_of_sale": "00005",
+      "invoice_number": "00003530",
+      "issue_date": "2026-02-20",
+      "due_date": "2026-03-22",
+      "issuer": {
+        "name": "Tecnored Patagonia S.A.",
+        "cuit": "30071872838",
+        "vat_condition": "responsable_inscripto"
+      },
+      "customer": {
+        "name": "Comercial del Sur S.A.",
+        "cuit": "33103391720",
+        "address": "Ruta 3 Km 12, Bahia Blanca",
+        "vat_condition": "responsable_inscripto"
+      },
+      "currency": "ARS",
+      "exchange_rate": null,
+      "items": [
+        {
+          "code": "HW-092",
+          "description": "Disco SSD 1TB",
+          "quantity": "2.00",
+          "unit_price": "120800.00",
+          "discount": "0.00",
+          "vat_rate": "10.5",
+          "line_amount": "241600.00"
+        },
+        {
+          "code": "HW-118",
+          "description": "Cable de red categoria 6 (rollo 300m)",
+          "quantity": "2.00",
+          "unit_price": "93900.00",
+          "discount": "0.00",
+          "vat_rate": "21",
+          "line_amount": "187800.00"
+        },
+        {
+          "code": "SRV-02",
+          "description": "Consultoria de infraestructura",
+          "quantity": "2.00",
+          "unit_price": "96400.00",
+          "discount": "0.00",
+          "vat_rate": "10.5",
+          "line_amount": "192800.00"
+        },
+        {
+          "code": "LIB-07",
+          "description": "Manual de configuracion impreso",
+          "quantity": "3.00",
+          "unit_price": "81100.00",
+          "discount": "0.00",
+          "vat_rate": "10.5",
+          "line_amount": "243300.00"
+        }
+      ],
+      "vat_breakdown": [
+        {
+          "rate": "10.5",
+          "amount": "71158.50"
+        },
+        {
+          "rate": "21",
+          "amount": "39438.00"
+        }
+      ],
+      "other_taxes": [],
+      "net_amount": "865500.00",
+      "non_taxed_amount": "0.00",
+      "exempt_amount": "0.00",
+      "vat_amount": null,
+      "total": "976096.50",
+      "cae": {
+        "number": "75550784532285",
+        "expiry_date": "2026-03-02"
+      }
+    }
+  }
+}

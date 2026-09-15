@@ -1,0 +1,57 @@
+{
+  "result": {
+    "outcome": "extracted",
+    "invoice": {
+      "invoice_type": "E",
+      "document_code": "19",
+      "point_of_sale": "00005",
+      "invoice_number": "00006713",
+      "issue_date": "2026-02-27",
+      "due_date": "2026-03-29",
+      "issuer": {
+        "name": "Tecnored Patagonia S.A.",
+        "cuit": "30003533650",
+        "vat_condition": "responsable_inscripto"
+      },
+      "customer": {
+        "name": "Insumos del Litoral S.A.",
+        "cuit": "33241158395",
+        "address": "Bv. Pellegrini 456, Santa Fe",
+        "vat_condition": "responsable_inscripto"
+      },
+      "currency": "USD",
+      "exchange_rate": "880.2500",
+      "items": [
+        {
+          "code": "SRV-04",
+          "description": "Licencia anual de monitoreo",
+          "quantity": "3.00",
+          "unit_price": "68300.00",
+          "discount": "0.00",
+          "vat_rate": null,
+          "line_amount": "204900.00"
+        },
+        {
+          "code": "SRV-02",
+          "description": "Consultoria de infraestructura",
+          "quantity": "3.00",
+          "unit_price": "117600.00",
+          "discount": "0.00",
+          "vat_rate": null,
+          "line_amount": "352800.00"
+        }
+      ],
+      "vat_breakdown": [],
+      "other_taxes": [],
+      "net_amount": null,
+      "non_taxed_amount": "0.00",
+      "exempt_amount": "0.00",
+      "vat_amount": null,
+      "total": "557700.00",
+      "cae": {
+        "number": "63502690650035",
+        "expiry_date": "2026-03-09"
+      }
+    }
+  }
+}

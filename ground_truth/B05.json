@@ -1,0 +1,66 @@
+{
+  "result": {
+    "outcome": "extracted",
+    "invoice": {
+      "invoice_type": "B",
+      "document_code": "06",
+      "point_of_sale": "00005",
+      "invoice_number": "00005586",
+      "issue_date": "2026-01-31",
+      "due_date": "2026-03-02",
+      "issuer": {
+        "name": "Tecnored Patagonia S.A.",
+        "cuit": "30478646948",
+        "vat_condition": "responsable_inscripto"
+      },
+      "customer": {
+        "name": "Insumos del Litoral S.A.",
+        "cuit": "34909167681",
+        "address": "Bv. Pellegrini 456, Santa Fe",
+        "vat_condition": "responsable_inscripto"
+      },
+      "currency": "ARS",
+      "exchange_rate": null,
+      "items": [
+        {
+          "code": "SRV-03",
+          "description": "Mantenimiento preventivo de servidores",
+          "quantity": "1.00",
+          "unit_price": "76100.00",
+          "discount": "0.00",
+          "vat_rate": null,
+          "line_amount": "76100.00"
+        },
+        {
+          "code": "HW-118",
+          "description": "Cable de red categoria 6 (rollo 300m)",
+          "quantity": "3.00",
+          "unit_price": "110700.00",
+          "discount": "0.00",
+          "vat_rate": null,
+          "line_amount": "332100.00"
+        },
+        {
+          "code": "LIB-07",
+          "description": "Manual de configuracion impreso",
+          "quantity": "5.00",
+          "unit_price": "109700.00",
+          "discount": "0.00",
+          "vat_rate": null,
+          "line_amount": "548500.00"
+        }
+      ],
+      "vat_breakdown": [],
+      "other_taxes": [],
+      "net_amount": null,
+      "non_taxed_amount": "0.00",
+      "exempt_amount": "0.00",
+      "vat_amount": null,
+      "total": "1057153.50",
+      "cae": {
+        "number": "46210288066013",
+        "expiry_date": "2026-02-10"
+      }
+    }
+  }
+}

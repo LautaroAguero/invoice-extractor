@@ -1,0 +1,75 @@
+{
+  "result": {
+    "outcome": "extracted",
+    "invoice": {
+      "invoice_type": "C",
+      "document_code": "11",
+      "point_of_sale": "00005",
+      "invoice_number": "00002974",
+      "issue_date": "2026-04-15",
+      "due_date": "2026-05-15",
+      "issuer": {
+        "name": "Tecnored Patagonia S.A.",
+        "cuit": "30613953287",
+        "vat_condition": "responsable_inscripto"
+      },
+      "customer": {
+        "name": "Insumos del Litoral S.A.",
+        "cuit": "30168229603",
+        "address": "Bv. Pellegrini 456, Santa Fe",
+        "vat_condition": "responsable_inscripto"
+      },
+      "currency": "ARS",
+      "exchange_rate": null,
+      "items": [
+        {
+          "code": "SRV-02",
+          "description": "Consultoria de infraestructura",
+          "quantity": "4.00",
+          "unit_price": "99900.00",
+          "discount": "0.00",
+          "vat_rate": null,
+          "line_amount": "399600.00"
+        },
+        {
+          "code": "SRV-04",
+          "description": "Licencia anual de monitoreo",
+          "quantity": "1.00",
+          "unit_price": "143000.00",
+          "discount": "0.00",
+          "vat_rate": null,
+          "line_amount": "143000.00"
+        },
+        {
+          "code": "HW-045",
+          "description": "Switch administrable 24 puertos",
+          "quantity": "2.00",
+          "unit_price": "141800.00",
+          "discount": "0.00",
+          "vat_rate": null,
+          "line_amount": "283600.00"
+        },
+        {
+          "code": "SRV-03",
+          "description": "Mantenimiento preventivo de servidores",
+          "quantity": "3.00",
+          "unit_price": "62500.00",
+          "discount": "0.00",
+          "vat_rate": null,
+          "line_amount": "187500.00"
+        }
+      ],
+      "vat_breakdown": [],
+      "other_taxes": [],
+      "net_amount": null,
+      "non_taxed_amount": "0.00",
+      "exempt_amount": "0.00",
+      "vat_amount": null,
+      "total": "1169604.00",
+      "cae": {
+        "number": "73018326202432",
+        "expiry_date": "2026-04-25"
+      }
+    }
+  }
+}

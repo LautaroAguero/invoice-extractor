@@ -1,0 +1,7 @@
+{
+  "result": {
+    "outcome": "failed",
+    "reason": "not_an_invoice",
+    "detail": "Remito is not a supported invoice."
+  }
+}

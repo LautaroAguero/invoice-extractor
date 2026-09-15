@@ -1,0 +1,57 @@
+{
+  "result": {
+    "outcome": "extracted",
+    "invoice": {
+      "invoice_type": "C",
+      "document_code": "11",
+      "point_of_sale": "00005",
+      "invoice_number": "00006705",
+      "issue_date": "2026-01-13",
+      "due_date": null,
+      "issuer": {
+        "name": "Tecnored Patagonia S.A.",
+        "cuit": "30531379833",
+        "vat_condition": "responsable_inscripto"
+      },
+      "customer": {
+        "name": "Tecnologia Patagonica S.R.L.",
+        "cuit": "33644341564",
+        "address": "Belgrano 890, Neuquen",
+        "vat_condition": "responsable_inscripto"
+      },
+      "currency": "ARS",
+      "exchange_rate": null,
+      "items": [
+        {
+          "code": "SRV-05",
+          "description": "Migracion de base de datos",
+          "quantity": "2.00",
+          "unit_price": "111700.00",
+          "discount": "0.00",
+          "vat_rate": null,
+          "line_amount": "223400.00"
+        },
+        {
+          "code": "HW-220",
+          "description": "Router dual band AX3000",
+          "quantity": "5.00",
+          "unit_price": "119200.00",
+          "discount": "0.00",
+          "vat_rate": null,
+          "line_amount": "596000.00"
+        }
+      ],
+      "vat_breakdown": [],
+      "other_taxes": [],
+      "net_amount": null,
+      "non_taxed_amount": "0.00",
+      "exempt_amount": "0.00",
+      "vat_amount": null,
+      "total": "928894.00",
+      "cae": {
+        "number": "82601417698142",
+        "expiry_date": "2026-01-23"
+      }
+    }
+  }
+}

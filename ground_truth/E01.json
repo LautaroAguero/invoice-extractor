@@ -1,0 +1,57 @@
+{
+  "result": {
+    "outcome": "extracted",
+    "invoice": {
+      "invoice_type": "E",
+      "document_code": "19",
+      "point_of_sale": "00005",
+      "invoice_number": "00006253",
+      "issue_date": "2026-05-10",
+      "due_date": "2026-06-09",
+      "issuer": {
+        "name": "Tecnored Patagonia S.A.",
+        "cuit": "30772640656",
+        "vat_condition": "responsable_inscripto"
+      },
+      "customer": {
+        "name": "Tecnologia Patagonica S.R.L.",
+        "cuit": "33664184716",
+        "address": "Belgrano 890, Neuquen",
+        "vat_condition": "responsable_inscripto"
+      },
+      "currency": "USD",
+      "exchange_rate": "875.0000",
+      "items": [
+        {
+          "code": "SRV-04",
+          "description": "Licencia anual de monitoreo",
+          "quantity": "3.00",
+          "unit_price": "139400.00",
+          "discount": "0.00",
+          "vat_rate": null,
+          "line_amount": "418200.00"
+        },
+        {
+          "code": "SRV-05",
+          "description": "Migracion de base de datos",
+          "quantity": "4.00",
+          "unit_price": "130000.00",
+          "discount": "0.00",
+          "vat_rate": null,
+          "line_amount": "520000.00"
+        }
+      ],
+      "vat_breakdown": [],
+      "other_taxes": [],
+      "net_amount": null,
+      "non_taxed_amount": "0.00",
+      "exempt_amount": "0.00",
+      "vat_amount": null,
+      "total": "938200.00",
+      "cae": {
+        "number": "67983717849875",
+        "expiry_date": "2026-05-20"
+      }
+    }
+  }
+}
