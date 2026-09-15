@@ -49,8 +49,8 @@
 
 ## 8. Real set
 
-- [ ] 8.1 Resolve the design Open Question ("IVA Contenido" on real tickets) with the user after inspecting the two photos. Verify by recording the decision in design D10.
-- [ ] 8.2 Store the two photographed B tickets (personal data covered) and hand-annotated ground truth in `ground_truth_real/`, with a manifest in the shared format (`source` `real`). Verify by running `tests/test_dataset.py` with the real set present: it validates the real ground truth too and is skipped when the directory is absent. Verify `git status` shows nothing under `ground_truth_real/`.
+- [x] 8.1 Resolve the design Open Question ("IVA Contenido" on real tickets) with the user after inspecting the two photos. Verify by recording the decision in design D10. Done 2026-09-15: option (i), recorded in D10.
+- [x] 8.2 Store the two photographed B tickets (personal data covered) and hand-annotated ground truth in `ground_truth_real/`, with a manifest in the shared format (`source` `real`). Verify by running `tests/test_dataset.py` with the real set present: it validates the real ground truth too and is skipped when the directory is absent. Verify `git status` shows nothing under `ground_truth_real/`. Done 2026-09-15: `real_01.jpeg`/`real_02.jpeg` with hand-annotated ground truth and manifest; 4 real-set tests pass; `git status` clean. The user's review of the two annotations is still pending.
 
 ## 9. Documentation and cleanup
 

@@ -200,8 +200,19 @@ That totals 15 / 15. The JPG cases are single-page (D7), so `multi_page` and `im
 
 - **Location.** `ground_truth_real/` is added to `.gitignore` before any file is placed there. It gets a manifest with the same format: `source` `real`, and `null` for seed, generator version, degradation and `gt_check`.
 - **Annotation.** Ground truth is written by hand against the photo, under the same visibility rule. It is validated against the schema by a generator subcommand, since schema validity is the only automatic check possible.
-- **Privacy.** Personal data (name, DNI, address, card digits) is covered in the photo before it is stored. Company data printed by the issuer stays, because it is part of what is extracted.
-- **Pending.** Where a printed "IVA Contenido" goes is decided when the photos arrive (Open Questions).
+- **Privacy.**
+  - Personal data that is not extracted (the buyer's data, card digits, employee names) is covered in the photo before it is stored.
+  - **Found on the photos (2026-09-15):** both issuers are natural persons (CUIT prefixes 20 and 27, a person's name as razón social). What gets extracted is therefore third-party personal data, and it cannot be covered. It stays local: `ground_truth_real/` is git-ignored.
+  - Anything derived from the real set (run records, per-document outputs, failure examples) must stay out of git, the reports and the README too (PRD 03 R1.3).
+- **"IVA Contenido" (task 8.1, decided 2026-09-15: option (i)).** A printed "IVA Contenido" goes into `vat_amount`, because the schema description as written ("Total VAT printed as a single amount") says so. The ground truth follows the contract being evaluated.
+  - **Consequence:** `vat_amount` means VAT added on type A and VAT contained on these B tickets. That conflict is the evidence for the PRD 04 R6 candidate field, not something to hide by annotating `null`.
+  - **Same block, same rule:** "Otros impuestos nacionales" printed in the Ley 27.743 block goes into `other_taxes`, zero included.
+- **Unit price not printed** (decided 2026-09-15). One ticket prints only quantity and line amount. Every row has quantity 1, so `unit_price` equals the printed amount and is read, not computed. A row with quantity above 1 could not be represented without computing a value, which is a schema gap and a PRD 04 R6 candidate.
+- **Annotation notes.**
+  - `issuer.name` is the razón social line, not the fantasy name printed above it.
+  - Descriptions wrapped mid-word ("G30" / "5 WHITE") are joined with a single space, the whitespace rule of the measurement.
+  - `document_code` keeps the printed digits ("006", "6").
+- **Status.** `real_01` and `real_02` (JPEG) are annotated and have a manifest. They validate against the schema, and their CUITs pass mod-11 (`tests/test_dataset.py`). Their human review by the user is pending (`checklist`/`review` with `--out-dir ground_truth_real`).
 
 ### D11 · Dependencies
 
@@ -224,4 +235,4 @@ Not applicable: no deployed system. The spike stays as a reference until the gen
 
 ## Open Questions
 
-- **"IVA Contenido" on real tickets.** When a real ticket prints it, which ground-truth field holds it, and does it stay `null`? This affects only the hand annotation of `ground_truth_real/`. It does not change the synthetic dataset, these specs or the task breakdown. It is decided when the photos arrive.
+None. The only open question ("IVA Contenido" on real tickets) was resolved on 2026-09-15 (D10).

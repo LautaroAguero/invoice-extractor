@@ -30,7 +30,7 @@ This stage turns "it seems to work" into numbers. Running the baseline over the 
   - per document: prediction or typed failure, attempts, tokens (including cache and thinking-in-output), cost, latency;
   - aggregates.
 - **R1.2** The report is a pure function of a run record: `evaluate` and `report` are separable, and re-rendering a report never calls the model.
-- **R1.3** Run records contain only synthetic data and are safe to commit. Committing the ones behind the README numbers is what makes those numbers verifiable.
+- **R1.3** Run records over `ground_truth/` contain only synthetic data and are safe to commit. Committing the ones behind the README numbers is what makes those numbers verifiable. Run records, outputs and failure examples from `ground_truth_real/` contain third-party personal data (both issuers are natural persons, add-synthetic-dataset D10). They are written to a git-ignored location and never appear in committed reports, the failure analysis or the README.
 
 ### R2 · Comparison
 
