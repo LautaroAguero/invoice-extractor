@@ -69,6 +69,11 @@ class ModelClient:
         self._config = config
         self._sdk = sdk
 
+    @property
+    def model(self) -> str:
+        """The configured model ID, so a run record can name what it measured."""
+        return self._config.model
+
     @classmethod
     def from_config(cls, config: ExtractorConfig, **sdk_kwargs: Any) -> "ModelClient":
         """Build the real SDK client with the configured transport retry ceiling and timeout.

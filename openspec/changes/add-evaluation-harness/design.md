@@ -77,6 +77,22 @@ Expected tokens/cost/latency per document (estimated, to be replaced with measur
 
 `execute.py` uses an `asyncio.Semaphore(config.max_concurrency)` around each document's `extract_document()` call, and a single `asyncio.Lock`-protected running total compared against `config.spend_cap_usd` after every completed call. When the running total would exceed the cap, in-flight calls are allowed to finish (never cancelled mid-call, so their cost is still recorded) but no new call starts; the resulting `RunRecord` is written with `complete=False`. `report.py` refuses to render a report whose `complete` is `False` (R4.2, "nothing is reported as a full run").
 
+### D9. What "worst field" means (PRD 03 R3.2)
+
+The report marks the lowest-precision line among the scalar fields and the `<list>_per_entry` lines, ties broken by name. The `<list>_exact` lines are excluded: they are document-level composites of many fields, so one bad row anywhere makes them the lowest by construction and they would never say which field is weak. When every scored field is at 100% nothing is marked, so a tie-break never names a field that did not fail.
+
+Alternative considered: include every printed line. Rejected for the reason above. Alternative considered: break list entries down into per-sub-field lines (`items[].unit_price`). Not done here because `docs/measurement-rules.md` §3 scores lists as `_exact` and `_per_entry` only; sub-field detail lives in each comparison's `entry_errors` and is what the failure analysis (PRD 03 R6) reads.
+
+### D10. How the two paths are compared and the winner is named (PRD 03 R5.2-R5.4)
+
+`compare_records(run_a, run_b)` is a pure function of two saved run records, so a comparison re-renders without the model; `compare_paths` only produces the two records (path A then path B, each with its own spend cap). Only synthetic documents take part, and both runs must be complete and cover the same documents.
+
+- **Coverage group.** Documents path B ended without a call (no text layer, an image, or a PDF that cannot be parsed, which is recorded as that document's outcome instead of aborting the run) are listed apart and left out of the McNemar test. Including them would test "path B cannot read images", which is a coverage fact, not a difference in extraction quality (R5.3).
+- **Paired test.** McNemar exact over per-document correct outcome on the documents both paths attempted. Field deltas (B minus A, in points) use only the documents both paths extracted, so every field has the same denominator on both sides.
+- **Winner.** The path with more correct outcomes over all documents; a tie goes to the cheaper path per document. Coverage counts here, because reading every document is part of the domain. The trade-off sentence is built from the measured cost, p95 latency, coverage and McNemar p-value, and says "within the noise" when p >= 0.05, so a winner is never presented as statistically established when it is not.
+
+Alternative considered: a hand-written verdict in a document. Rejected because it can drift from the numbers; the generated sentence is regenerated with them, and `docs/failure-analysis.md` adds the interpretation.
+
 ## Risks / Trade-offs
 
 | Risk | Mitigation |

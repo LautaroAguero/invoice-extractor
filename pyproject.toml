@@ -13,6 +13,8 @@ dependencies = [
     "anthropic>=1.5,<1.6",
     "pydantic>=2",
     "python-dotenv",
+    # Path B text extraction (PRD 03 R5.1). MIT, so unlike the GPL generator it needs no isolation.
+    "pdfplumber>=0.11,<0.12",
 ]
 
 [project.optional-dependencies]

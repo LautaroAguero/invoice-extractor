@@ -84,11 +84,44 @@ def test_message_layout_prompt_in_system_document_in_user_turn(pdf, config, spik
     assert request["output_config"]["format"]["schema"] == anthropic.transform_schema(ExtractionResult)
 
 
+FAKE_JPEG = b"\xff\xd8\xff\xe0 synthetic jpeg"
+
+
+def test_jpg_input_is_sent_as_an_image_block(tmp_path, config, spike_payload):
+    path = tmp_path / "scan.jpg"
+    path.write_bytes(FAKE_JPEG)
+    sdk = FakeSdk(make_message(extracted_text(spike_payload)))
+    record = asyncio.run(extract_document(path, client=ModelClient(config, sdk), prompt=load_prompt("v1")))
+
+    (request,) = sdk.messages.requests
+    (user_turn,) = request["messages"]
+    (block,) = user_turn["content"]
+    assert block == {
+        "type": "image",
+        "source": {"type": "base64", "media_type": "image/jpeg", "data": base64.b64encode(FAKE_JPEG).decode()},
+    }
+    assert record.source == "scan.jpg"
+    assert isinstance(record.call.outcome.value.result, Extracted)
+
+
+def test_jpeg_suffix_is_also_an_image(tmp_path, config, spike_payload):
+    path = tmp_path / "photo.JPEG"
+    path.write_bytes(FAKE_JPEG)
+    sdk = FakeSdk(make_message(extracted_text(spike_payload)))
+    asyncio.run(extract_document(path, client=ModelClient(config, sdk), prompt=load_prompt("v1")))
+    assert sdk.messages.requests[0]["messages"][0]["content"][0]["type"] == "image"
+
+
 @pytest.mark.parametrize(
     ("name", "content"),
-    [("scan.jpg", b"\xff\xd8\xff\xe0 jpeg"), ("renamed.pdf", b"\xff\xd8\xff\xe0 jpeg"), ("notes.txt", b"%PDF-1.4")],
+    [
+        ("renamed.pdf", FAKE_JPEG),  # a JPEG with a .pdf name
+        ("renamed.jpg", FAKE_PDF),  # a PDF with a .jpg name
+        ("notes.txt", FAKE_PDF),
+        ("scan.png", b"\x89PNG\r\n\x1a\n"),
+    ],
 )
-def test_non_pdf_input_is_rejected_with_zero_calls(tmp_path, config, name, content):
+def test_input_that_is_neither_pdf_nor_jpeg_is_rejected_with_zero_calls(tmp_path, config, name, content):
     path = tmp_path / name
     path.write_bytes(content)
     sdk = FakeSdk()
@@ -174,9 +207,9 @@ def test_missing_api_key_exits_with_usage_error(pdf, monkeypatch, capsys):
     assert "ANTHROPIC_API_KEY is not set" in err and "Traceback" not in err
 
 
-def test_non_pdf_input_exits_with_usage_error(tmp_path, config, capsys):
-    path = tmp_path / "scan.jpg"
-    path.write_bytes(b"\xff\xd8")
+def test_unsupported_input_exits_with_usage_error(tmp_path, config, capsys):
+    path = tmp_path / "notes.txt"
+    path.write_bytes(b"not a document")
     sdk = FakeSdk()
     assert main([str(path)], client=ModelClient(config, sdk)) == EXIT_USAGE
     assert sdk.messages.requests == []

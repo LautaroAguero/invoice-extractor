@@ -15,3 +15,6 @@ tools/generate_invoices/out/
 
 # Real photographed set: personal/company data, never committed (D10)
 ground_truth_real/
+
+# Run records over the real set: third-party personal data (PRD 03 R1.3)
+runs/real/

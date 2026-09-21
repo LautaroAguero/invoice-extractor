@@ -1,7 +1,7 @@
-"""Extract one PDF and print what the call cost and how it ended.
+"""Extract one PDF or JPG and print what the call cost and how it ended.
 
 Usage:
-    python -m invoice_extractor.extract_one <pdf> [--max-tokens N] [--prompt v1]
+    python -m invoice_extractor.extract_one <pdf-or-jpg> [--max-tokens N] [--prompt v1]
 
 Exit codes: 0 extracted, 1 explicit failure (model failure or call failure), 2 usage or configuration error.
 """

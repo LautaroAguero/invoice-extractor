@@ -32,6 +32,10 @@ For a document with no text layer or a document available only as an image, path
 - **WHEN** path B runs on a document tagged `image_input`
 - **THEN** the outcome is an explicit failure, not an extraction
 
+#### Scenario: PDF that cannot be parsed on path B
+- **WHEN** path B runs on a PDF whose structure cannot be parsed
+- **THEN** the outcome for that document is an explicit failure with no model call, and the run continues with the remaining documents
+
 ### Requirement: Comparison result table
 
 The comparison result SHALL report, per path: field precision, invented value count, cost per document and p95 latency, and SHALL name the winning path for this domain together with its trade-off.
