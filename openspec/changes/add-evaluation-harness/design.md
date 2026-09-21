@@ -1,0 +1,91 @@
+## Context
+
+Stage 1 (`add-happy-path-extraction`) gives us `ModelClient.call()` (returns a `CallRecord` with tokens/cost/latency/outcome, PDF-only content) and `extract_document()` (PDF path → `ExtractionRecord`). Stage 2 (`add-synthetic-dataset`) gives us `ground_truth/` (30 docs + `manifest.jsonl` with `expected_outcome`, `expected_reason`, `tags`, `format`) and `ground_truth_real/` (2 docs, git-ignored). `docs/measurement-rules.md` is fixed and committed. There is no evaluation code yet, no `scipy`, no `pdfplumber`, and `runs/` does not exist. See proposal.md - Why for motivation and requirement IDs.
+
+## Goals / Non-Goals
+
+**Goals:**
+- One place that runs the dataset, scores it, and persists everything needed to reproduce the report without another model call.
+- Keep `evaluate` (spends money) and `report` (reads a file) as separate, independently testable operations (R1.2).
+- Reuse stage 1's instrumentation (`CallRecord`) instead of re-deriving cost/tokens.
+
+**Non-Goals:**
+- Fixing what the analysis finds, or business validation (PRD 04).
+- CLI polish — a minimal `argparse` entry point is enough here (PRD 05 does the rest).
+- OCR for path B, or any change to what path A sends for PDFs.
+
+## Decisions
+
+### D1. Module layout: `src/invoice_extractor/evaluation/`
+
+```
+evaluation/
+  manifest.py     # load ground_truth/manifest.jsonl and ground_truth_real/manifest.jsonl into a typed Manifest/DocumentEntry
+  compare.py       # docs/measurement-rules.md §2-§4: normalize, compare one field, compare one Invoice, classify document outcome
+  stats.py          # wilson_interval(k, n), mcnemar_exact(b, c) — no scipy dependency
+  run_record.py    # RunConfig, DocumentResult, RunRecord (pydantic), read/write to runs/
+  execute.py        # run the dataset: bounded concurrency (asyncio.Semaphore) + spend cap, builds a RunRecord
+  report.py          # RunRecord -> report sections -> terminal text + markdown (pure, R1.2)
+  ingestion.py        # path B: pdfplumber text extraction, path A/B dispatch for the comparison
+  path_comparison.py   # R5: run both paths, pair them, render the comparison table
+evaluate.py    # entry point: python -m invoice_extractor.evaluate (writes a run record)
+report_cli.py  # entry point: python -m invoice_extractor.report_cli <run-record> (re-renders, no network)
+```
+
+Alternative considered: fold everything into `extraction.py` / a single `evaluation.py`. Rejected — `compare.py`, `stats.py` and `report.py` have zero dependency on the model client and are the most test-heavy part of this stage; keeping them in their own files makes that visible and matches the existing one-concern-per-module style (`client.py`, `config.py`, `extraction.py`, `prompts.py`, `schema.py`).
+
+### D2. Run record shape: one JSON + one JSONL per run
+
+`runs/<run_id>.json` — `RunConfig` (model ID, prompt version, schema hash, `anthropic`/`pydantic` versions, ingestion path, generator version from the manifest, git SHA via `git rev-parse HEAD`, timestamp, `complete: bool`) plus `aggregates` (computed once at write time, not re-derived by `report.py`, so a re-render can be diffed against them as a consistency check).
+`runs/<run_id>.jsonl` — one line per document: `{document_id, extraction: ExtractionRecord, comparison: ComparisonResult}`.
+
+`run_id` is `<timestamp>-<ingestion_path>-<short_git_sha>`, e.g. `20260917-1200-path_a-b8bc5d4`.
+
+Real-set runs use the same shapes under `runs/real/` (git-ignored — `.gitignore` gets a `runs/real/` line, following the existing `ground_truth_real/` pattern). `execute.py` takes the manifest path and the output directory as separate parameters, so nothing about "which set this is" is inferred from content; the caller (the CLI entry point) decides the directory, which is what keeps a real-set run from ever landing in the committed `runs/`.
+
+Alternative considered: a single JSON with a `documents` array. Rejected for two reasons: JSONL diffs cleanly per document in git (synthetic run records are committed, R1.3), and `report.py` can stream it instead of holding the whole run in memory — not a real concern at n=32, but it matches how `manifest.jsonl` already works in this repo.
+
+### D3. Comparison: reflect over the `Invoice` model
+
+`compare.py` walks `Invoice`'s Pydantic fields (`model_fields`) rather than hardcoding each field name. Leaf scalar fields go through one normalize-and-equal function keyed by a small type table (Decimal, date, "digits", "casefold-text", enum) built once from field metadata (annotation type + which fields are the digit-only ones per §4 — `cuit`, `point_of_sale`, `invoice_number`, CAE `number`). `items`, `vat_breakdown`, `other_taxes` get the shared position-matching routine from §3, parameterized by which sub-model they hold.
+
+Alternative considered: a hand-written comparison function per field (30+ `if` branches). Rejected — measurement-rules.md's normalization table already collapses to 6 kinds (D4 below), and hardcoding each field name would mean this module silently drifts from `schema.py` the next time a field is added, instead of failing loudly (an unrecognized field/type in the table raises rather than being skipped).
+
+### D4. Statistics: hand-rolled Wilson interval and McNemar exact, no `scipy`
+
+Wilson score interval is a closed-form formula (~10 lines). McNemar exact (n=30, so `b+c` is always small) is a two-sided exact binomial test on the discordant pairs, also closed-form with `math.comb`. Both are unit-testable against known reference values (e.g. Wilson interval for k=27, n=30 against a published table).
+
+Alternative considered: add `scipy` for `scipy.stats.binomtest` / a Wilson helper. Rejected — it would be the project's first heavy numeric dependency for two formulas the project already commits to in `docs/measurement-rules.md` §6, and hand-rolling keeps the trust chain (which exact test, which correction) visible in this repo instead of inside a library default.
+
+### D5. `pdfplumber` as a normal dependency
+
+Added to `[project.dependencies]` in `pyproject.toml`, imported directly by `evaluation/ingestion.py`. Unlike `tools/generate_invoices/pyafipws` (GPL-3.0, needs its own venv so its license never touches the extractor), `pdfplumber` is MIT and has no license interaction with this project's code — no isolation needed. This was decided at spike time (OQ-3.1 in PRD 03).
+
+### D6. JPG support in `extraction.py`: image content block
+
+`pdf_document_block` gets a sibling `image_block(path)` that base64-encodes the file and returns `{"type": "image", "source": {"type": "base64", "media_type": "image/jpeg", "data": ...}}`. `extract_document` dispatches on suffix: `.pdf` → document block, `.jpg`/`.jpeg` → image block, anything else → `UnsupportedInputError`, unchanged from stage 1 except for the added branch. This is the same `client.call()` call site as stage 1 (see D7) — only the content block passed to it changes.
+
+### D7. Model call sites and failure handling (unchanged from stage 1)
+
+This change adds no new call site to the model. Both the per-document evaluation loop (path A) and the path-comparison run (path A and path B) call `extract_document()` / `client.call()` exactly as stage 1 does, so every failure mode (truncated, refused, invalid output, api_error, and the configuration errors that raise instead of returning a record) is handled exactly per `model-client` spec — nothing here changes that behavior. `execute.py`'s job is orchestration around that call: bounded concurrency and the spend cap (D8), not a new way of calling the model.
+
+Path B (`pdfplumber` text) never calls the model itself — it produces the text content block that path A's document/image block is swapped for; the same `client.call()` is then used with `content=[{"type": "text", "text": extracted_text}]`.
+
+Expected tokens/cost/latency per document (estimated, to be replaced with measured numbers once the baseline run exists): ~1,500-3,000 input tokens for a 1-page invoice PDF (per PRD 00's verified platform facts) plus the ~600-token v1 prompt, ~200-400 output tokens for a typical `Extracted` result, so roughly $0.005-0.008/doc on `claude-sonnet-5` ($2/$10 per MTok) and 2-6s latency per call. Path B is expected to cost less per document (extracted text is smaller than a rendered PDF page) and to have a comparable or lower latency; the comparison in R5.4 replaces these estimates with measured numbers.
+
+### D8. Bounded concurrency and spend cap
+
+`execute.py` uses an `asyncio.Semaphore(config.max_concurrency)` around each document's `extract_document()` call, and a single `asyncio.Lock`-protected running total compared against `config.spend_cap_usd` after every completed call. When the running total would exceed the cap, in-flight calls are allowed to finish (never cancelled mid-call, so their cost is still recorded) but no new call starts; the resulting `RunRecord` is written with `complete=False`. `report.py` refuses to render a report whose `complete` is `False` (R4.2, "nothing is reported as a full run").
+
+## Risks / Trade-offs
+
+| Risk | Mitigation |
+|---|---|
+| Hand-rolled Wilson/McNemar has a subtle formula bug | Unit tests against published reference values (design D4); code stays small and reviewable |
+| Reflection-based comparison (D3) is harder to read than explicit field code | The type-table approach keeps per-field logic to one line each; an unmapped field raises instead of silently passing, so drift from `schema.py` is loud |
+| Real-set output accidentally lands in a committed path | `execute.py` never infers the output directory; the CLI entry point that calls it for `ground_truth_real/` is the only place `runs/real/` is named, and it is covered by a test asserting the write path |
+| `pdfplumber` extraction behaves differently across the dataset's mixed PDF sources (native + rendered) | R5.3 already carves out `skewed_scan`/`image_input` as a separate coverage group instead of averaging them into path B's precision |
+
+## Open Questions
+
+None — OQ-3.1 and OQ-3.2 were resolved before this design (see proposal.md), and every decision above was made here rather than deferred.
