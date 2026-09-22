@@ -195,6 +195,21 @@ def test_configuration_errors_are_raised(error):
         call(ModelClient(make_config(), FakeSdk(error)))
 
 
+@pytest.mark.parametrize(
+    "message",
+    ["Your credit balance is too low to access the API", "billing error: account suspended"],
+    ids=["credit", "billing"],
+)
+def test_an_exhausted_account_is_raised_not_recorded(message):
+    # A 400 is normally one document's api_error, but this one blocks every later call too.
+    request = httpx2.Request("POST", "https://api.anthropic.com/v1/messages")
+    response = httpx2.Response(400, request=request, headers={"request-id": "req_err"})
+    error = anthropic.BadRequestError(message, response=response, body=None)
+
+    with pytest.raises(anthropic.BadRequestError):
+        call(ModelClient(make_config(), FakeSdk(error)))
+
+
 def test_unknown_model_is_rejected_before_sending():
     sdk = FakeSdk(make_message(WEATHER))
     with pytest.raises(ConfigError):

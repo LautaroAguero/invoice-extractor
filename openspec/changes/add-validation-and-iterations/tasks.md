@@ -14,6 +14,7 @@
 ## 2. Model client (spec model-client, MODIFIED; design D3)
 
 - [ ] 2.1 Accept `messages` (alternating turns, starting and ending with `user`) in `ModelClient.call` alongside `content`, raising before any request on a malformed conversation; add `raw_text` to `CallFailure` for `invalid_output`; verify with fake-SDK tests: the three-turn request is sent in order, a conversation ending in `assistant` sends nothing, and an `invalid_output` failure carries the raw text
+- [x] 2.1b Raise instead of recording when a 400 says the account's credit balance is too low or names a billing problem, so a run aborts like it does on an auth error (done 2026-09-22, ahead of this change: run `20260922-195941` finished "complete" with 20 such api_errors); verified by client, execute and CLI tests with no API key
 - [ ] 2.2 Count transport requests per call with an `http_client` request hook and a `ContextVar` set inside `call`; add `CallRecord.transport_requests` (defaulting to 1 when read from older records); verify with `MockTransport` tests: 529-then-200 reports 2, two concurrent calls where only one is retried report 2 and 1, and a fake SDK without the hook reports 1
 
 ## 3. Corrective retries (PRD 04 R2; spec corrective-retries; design D2)

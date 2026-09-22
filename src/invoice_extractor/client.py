@@ -21,6 +21,14 @@ FailureKind = Literal["truncated", "refused", "invalid_output", "api_error"]
 _TRUNCATED_STOP_REASONS = {"max_tokens", "model_context_window_exceeded"}
 # Every later call would fail the same way, so these stop the run instead of becoming records.
 _CONFIGURATION_ERRORS = (anthropic.AuthenticationError, anthropic.PermissionDeniedError, anthropic.NotFoundError)
+# An exhausted balance arrives as a plain 400, which would otherwise be one document's api_error
+# and let a run finish "complete" on 20 failures (measured 2026-09-22, run 20260922-195941).
+_ACCOUNT_BLOCKED_MESSAGES = ("credit balance is too low", "billing")
+
+
+def _is_account_blocked(exc: anthropic.APIStatusError) -> bool:
+    message = (exc.message or "").lower()
+    return exc.status_code == 400 and any(text in message for text in _ACCOUNT_BLOCKED_MESSAGES)
 
 
 class Messages(Protocol):
@@ -109,6 +117,8 @@ class ModelClient:
         except _CONFIGURATION_ERRORS:
             raise
         except anthropic.APIStatusError as exc:
+            if _is_account_blocked(exc):
+                raise
             detail = f"HTTP {exc.status_code} {type(exc).__name__}: {exc.message}"
             return _api_error(output_model, model, started, detail, exc.request_id)
         except anthropic.APIConnectionError as exc:

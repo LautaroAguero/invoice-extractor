@@ -194,3 +194,15 @@ def test_configuration_errors_abort_the_run_instead_of_becoming_records(tmp_path
     sdk = RoutedSdk(lambda doc: _http_error(anthropic.AuthenticationError, 401))
     with pytest.raises(anthropic.AuthenticationError):
         run(manifest, sdk, config)
+
+
+def test_an_exhausted_account_aborts_the_run(tmp_path, config):
+    # Otherwise the run finishes "complete" with an api_error per document (run 20260922-195941).
+    manifest = write_dataset(tmp_path, _ids(4))
+    request = httpx2.Request("POST", "https://api.anthropic.com/v1/messages")
+    response = httpx2.Response(400, request=request, headers={"request-id": "req_err"})
+    error = anthropic.BadRequestError("Your credit balance is too low to access the API", response=response, body=None)
+    sdk = RoutedSdk(lambda doc: error)
+
+    with pytest.raises(anthropic.BadRequestError):
+        run(manifest, sdk, config)

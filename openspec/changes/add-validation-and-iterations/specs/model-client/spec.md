@@ -35,3 +35,23 @@ Every call SHALL return a record with: the outcome, model ID, stop reason, input
 #### Scenario: Concurrent calls count independently
 - **WHEN** two calls run concurrently on one client and only one of them is retried
 - **THEN** each record reports only its own transport requests
+
+### Requirement: Transport failures are bounded and typed
+
+Rate limits, overload, server errors, connection errors and timeouts SHALL be retried by the SDK with exponential backoff up to a configured ceiling that cannot be unlimited. When retries are exhausted, or on a non-retryable request error, the outcome SHALL be an `api_error` call failure. Authentication, permission, unknown-model errors and an exhausted account balance SHALL be raised, because every later call would fail the same way. Transport retries SHALL NOT be counted as corrective attempts.
+
+#### Scenario: Retries exhausted
+- **WHEN** every attempt returns HTTP 529 until the retry ceiling
+- **THEN** the outcome is an `api_error` failure and the latency covers all attempts
+
+#### Scenario: Bad request
+- **WHEN** the API returns HTTP 400
+- **THEN** the outcome is an `api_error` failure without retries
+
+#### Scenario: Authentication error
+- **WHEN** the API returns HTTP 401
+- **THEN** the call raises instead of returning a record
+
+#### Scenario: Exhausted account balance
+- **WHEN** the API returns HTTP 400 because the account's credit balance is too low
+- **THEN** the call raises instead of returning a record, so the run aborts rather than recording a failure per document
