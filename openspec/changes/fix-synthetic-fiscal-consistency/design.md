@@ -48,15 +48,15 @@ Alternative: sort by rate. Rejected: correct by coincidence for these templates 
 
 ### D4. Verification checks the order
 
-`verify.py` finds each `vat_breakdown` entry's printed label ("I.V.A. 10,5%") in the clean text layer and asserts the positions increase in ground-truth order. A failure names `vat_breakdown`. A test feeds a reversed breakdown and asserts generation fails, reproducing the `148bac7` defect.
+`verify.py` finds each `vat_breakdown` entry's printed line ("IVA 10,5% 79.180,50") in the clean text layer and asserts the positions increase in ground-truth order. A failure names `vat_breakdown`. A test feeds a reversed breakdown and asserts generation fails, reproducing the `148bac7` defect.
 
 ### D5. Regeneration and review
 
 1. Commit the generator changes (generation refuses dirty code).
 2. Run `generate_dataset` into a temporary directory.
 3. A comparison script lists every file that differs from `ground_truth/`, and it must list exactly: B01–B07 and C01–C05 (`.json` plus `.pdf`/`.jpg`) and `nota_debito_b.pdf`. Any other difference stops the change.
-4. Copy the new files in. In `manifest.jsonl`, every entry takes the new `generator_version`; `gt_check` and `pages` are refreshed; `reviewed_by`/`reviewed_at` are reset to null for the 16 changed documents only.
-5. The user reviews those 16 with the existing `review` checklist command (the spec's human review requirement), which stamps them.
+4. Copy the new files in. In `manifest.jsonl`, every entry takes the new `generator_version`; `gt_check` and `pages` are refreshed; `reviewed_by`/`reviewed_at` are reset to null for the 13 changed documents only.
+5. The user reviews those 13 with the existing `review` checklist command (the spec's human review requirement), which stamps them.
 
 `test_regeneration.py` then passes on the committed dataset. That is the first time since `148bac7`.
 
@@ -72,9 +72,9 @@ The stage 3 records (`20260922-155901-path_a-148bac7`, `20260922-160125-path_b-1
 
 ## Risks / Trade-offs
 
-- [Changing the B pricing rule shifts the random sequence and silently changes A/E] → D1/D2 keep every draw. D5 step 3 treats any change outside the 16 expected documents as a stop condition.
+- [Changing the B pricing rule shifts the random sequence and silently changes A/E] → D1/D2 keep every draw. D5 step 3 treats any change outside the 13 expected documents as a stop condition.
 - [A B03/B06 line now prints a VAT-included amount next to a rate, which the model might read as net] → This is how a real B to a consumidor final looks. The baseline re-run measures it, and it is exactly the kind of evidence stage 4 needs.
 - [ROUND_HALF_UP on the net per line breaks V4-style checks on B] → B prints no breakdown, so V4 does not run on B. The unprinted net and VAT still add up exactly (D1).
 - [The new baseline differs from the stage 3 numbers and makes stage 3 look inconsistent] → Stage 3 records are kept and labeled with their dataset version. The quality report says which dataset each section measured.
 - [A Factura C issuer "Tecnored Patagonia S.A." with a 30- CUIT cannot really be a monotributista (only natural persons can)] → Accepted and documented (user decision, 2026-09-22). A natural-person name and a 20/23/27 CUIT would break the spec rule that keeps synthetic CUITs off natural-person prefixes, so a generated CUIT can never match a real person. The coherence that the validator and the model depend on (a C has no VAT and prints "IVA Responsable Monotributo") holds.
-- [16 documents need a human review again] → The review command already exists, and the checklist shows the null fields. That is roughly 20 minutes of the user's time, and the task is theirs.
+- [13 documents need a human review again] → The review command already exists, and the checklist shows the null fields. That is roughly 20 minutes of the user's time, and the task is theirs.

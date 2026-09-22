@@ -11,7 +11,7 @@
       "issuer": {
         "name": "Tecnored Patagonia S.A.",
         "cuit": "30613953287",
-        "vat_condition": "responsable_inscripto"
+        "vat_condition": "responsable_monotributo"
       },
       "customer": {
         "name": "Insumos del Litoral S.A.",
@@ -65,7 +65,7 @@
       "non_taxed_amount": "0.00",
       "exempt_amount": "0.00",
       "vat_amount": null,
-      "total": "1169604.00",
+      "total": "1013700.00",
       "cae": {
         "number": "73018326202432",
         "expiry_date": "2026-04-25"

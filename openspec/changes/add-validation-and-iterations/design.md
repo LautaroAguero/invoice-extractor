@@ -7,7 +7,7 @@ See proposal.md for motivation. Current state that shapes the approach:
 - `evaluation/execute.py` scores one `ExtractionRecord` per document, with `attempts=1` hard-coded (PRD 03 R4.3). `DocumentResult.extraction` is a single record, and `read_run_record` recomputes aggregates and rejects a record whose aggregates differ.
 - The stage 3 baseline is near the ceiling: 30/30 correct outcomes and 3 wrong fields, all on B05 (`items[].vat_rate` `"0"` instead of `null`). The noise floor at n=30 is about ±9 points for one run and about ±12.6 between runs. Most iterations will be within noise, and the log has to say so.
 - Measured baseline cost: $0.0376/doc and p95 44.4s (Sonnet 5, path A). Every estimate below starts from these numbers.
-- Prerequisite: the B/C generator fix (see proposal) re-renders 15 documents and re-runs v1. The design assumes that after the fix, B/C items sum to the printed total and E already does.
+- Prerequisite: the B/C generator fix (see proposal) re-renders 13 documents (12 B/C and the nota de débito B) and re-runs v1. The design assumes that after the fix, B/C items sum to the printed total and E already does.
 
 ## Goals / Non-Goals
 

@@ -11,7 +11,7 @@
       "issuer": {
         "name": "Tecnored Patagonia S.A.",
         "cuit": "30076924291",
-        "vat_condition": "responsable_inscripto"
+        "vat_condition": "responsable_monotributo"
       },
       "customer": {
         "name": "Tecnologia Patagonica S.R.L.",
@@ -47,7 +47,7 @@
       "non_taxed_amount": "0.00",
       "exempt_amount": "0.00",
       "vat_amount": null,
-      "total": "513766.00",
+      "total": "424600.00",
       "cae": {
         "number": "44508531582962",
         "expiry_date": "2026-02-12"

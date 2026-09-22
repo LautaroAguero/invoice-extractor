@@ -10,7 +10,7 @@ Open questions this change depends on, all resolved with the user on 2026-09-22:
 - **OQ-4.3** (stopping condition) — resolved: at least 3 versions after the baseline (the PRD minimum) and a total iteration budget of USD 10. Stop when both are met or the budget is spent.
 - **R5.1 in scope** — resolved: compare Haiku 4.5 and Opus 5 against Sonnet 5.
 
-**Prerequisite (separate change, applied first):** the 15 synthetic Factura B and C documents print a total that no printed amount explains (the generator adds hidden VAT: `tools/generate_invoices/generator/params.py:120`; e.g. B01 items sum 1,047,400.00, total 1,223,632.00), and a Factura C carrying VAT is fiscally wrong. V2/V3 would reject all 15 as false rejections. The user chose to fix the generator (B line amounts include VAT, C carries no VAT, items = total on both), regenerate those documents and their ground truth, and re-run the v1 baseline, in a change of its own before this one. This change's baseline is that re-run, not `20260922-155901-path_a-148bac7`.
+**Prerequisite (separate change, applied first):** the 12 synthetic Factura B and C documents print a total that no printed amount explains (the generator adds hidden VAT: `tools/generate_invoices/generator/params.py:120`; e.g. B01 items sum 1,047,400.00, total 1,223,632.00), and a Factura C carrying VAT is fiscally wrong. V2/V3 would reject all 12 as false rejections. The user chose to fix the generator (B line amounts include VAT, C carries no VAT, items = total on both), regenerate those documents and their ground truth, and re-run the v1 baseline, in a change of its own before this one. This change's baseline is that re-run, not `20260922-155901-path_a-148bac7`.
 
 ## What Changes
 

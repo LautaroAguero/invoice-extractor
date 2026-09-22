@@ -11,7 +11,7 @@
       "issuer": {
         "name": "Tecnored Patagonia S.A.",
         "cuit": "30695168159",
-        "vat_condition": "responsable_inscripto"
+        "vat_condition": "responsable_monotributo"
       },
       "customer": {
         "name": "Comercial del Sur S.A.",
@@ -56,7 +56,7 @@
       "non_taxed_amount": "0.00",
       "exempt_amount": "0.00",
       "vat_amount": null,
-      "total": "1590474.00",
+      "total": "1384800.00",
       "cae": {
         "number": "21138823611959",
         "expiry_date": "2026-02-17"
