@@ -21,8 +21,9 @@ from invoice_extractor.client import ModelClient
 from invoice_extractor.evaluation.manifest import DocumentEntry
 from invoice_extractor.evaluation.run_record import IngestionPath, NoCallReason
 from invoice_extractor.extraction import (
-    JPEG_SUFFIXES,
+    IMAGE_SUFFIXES,
     PDF_MAGIC,
+    SUPPORTED,
     ExtractionRecord,
     UnsupportedInputError,
     extract_document,
@@ -60,12 +61,12 @@ def extract_text_pages(path: Path) -> str | None:
 def _require_pdf(path: Path) -> None:
     with path.open("rb") as handle:
         if path.suffix.lower() != ".pdf" or not handle.read(len(PDF_MAGIC)) == PDF_MAGIC:
-            raise UnsupportedInputError(f"{path.name}: only PDF and JPG input is supported")
+            raise UnsupportedInputError(f"{path.name}: {SUPPORTED}")
 
 
 async def extract_path_b(entry: DocumentEntry, path: Path, client: ModelClient, prompt: Prompt) -> ExtractionRecord | NoCall:
     """Path B: the PDF's own text is sent as a text block. Images, text-less and unparseable PDFs are explicit failures."""
-    if path.suffix.lower() in JPEG_SUFFIXES:
+    if path.suffix.lower() in IMAGE_SUFFIXES:
         return NoCall("image_input")
     _require_pdf(path)  # before any work: an unsupported file never costs a request
     try:

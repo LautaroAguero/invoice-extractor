@@ -19,6 +19,8 @@ dependencies = [
 
 [project.optional-dependencies]
 dev = ["pytest"]
+# The local page (PRD 06). Optional on purpose: the core package and pytest never need it.
+ui = ["streamlit>=1.40,<2"]
 
 [tool.setuptools.packages.find]
 where = ["src"]

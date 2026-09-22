@@ -12,7 +12,7 @@ from fakes import FakeSdk, make_message
 from invoice_extractor.client import ModelClient, Parsed
 from invoice_extractor.config import DEFAULT_CONFIG_PATH, load_config
 from invoice_extractor.extract_one import EXIT_EXTRACTED, EXIT_FAILURE, EXIT_USAGE, main
-from invoice_extractor.extraction import UnsupportedInputError, extract_document
+from invoice_extractor.extraction import PNG_MAGIC, UnsupportedInputError, extract_document
 from invoice_extractor.prompts import PROMPTS_DIR, PromptNotFoundError, load_prompt
 from invoice_extractor.schema import Extracted, ExtractionResult, Failed
 
@@ -85,6 +85,7 @@ def test_message_layout_prompt_in_system_document_in_user_turn(pdf, config, spik
 
 
 FAKE_JPEG = b"\xff\xd8\xff\xe0 synthetic jpeg"
+FAKE_PNG = PNG_MAGIC + b" synthetic png"
 
 
 def test_jpg_input_is_sent_as_an_image_block(tmp_path, config, spike_payload):
@@ -104,6 +105,20 @@ def test_jpg_input_is_sent_as_an_image_block(tmp_path, config, spike_payload):
     assert isinstance(record.call.outcome.value.result, Extracted)
 
 
+def test_png_input_is_sent_as_an_image_block(tmp_path, config, spike_payload):
+    path = tmp_path / "screenshot.png"
+    path.write_bytes(FAKE_PNG)
+    sdk = FakeSdk(make_message(extracted_text(spike_payload)))
+    record = asyncio.run(extract_document(path, client=ModelClient(config, sdk), prompt=load_prompt("v1")))
+
+    (block,) = sdk.messages.requests[0]["messages"][0]["content"]
+    assert block == {
+        "type": "image",
+        "source": {"type": "base64", "media_type": "image/png", "data": base64.b64encode(FAKE_PNG).decode()},
+    }
+    assert record.source == "screenshot.png"
+
+
 def test_jpeg_suffix_is_also_an_image(tmp_path, config, spike_payload):
     path = tmp_path / "photo.JPEG"
     path.write_bytes(FAKE_JPEG)
@@ -118,10 +133,11 @@ def test_jpeg_suffix_is_also_an_image(tmp_path, config, spike_payload):
         ("renamed.pdf", FAKE_JPEG),  # a JPEG with a .pdf name
         ("renamed.jpg", FAKE_PDF),  # a PDF with a .jpg name
         ("notes.txt", FAKE_PDF),
-        ("scan.png", b"\x89PNG\r\n\x1a\n"),
+        ("renamed.png", FAKE_JPEG),  # a JPEG with a .png name
+        ("scan.gif", FAKE_PNG),
     ],
 )
-def test_input_that_is_neither_pdf_nor_jpeg_is_rejected_with_zero_calls(tmp_path, config, name, content):
+def test_input_that_is_not_a_supported_format_is_rejected_with_zero_calls(tmp_path, config, name, content):
     path = tmp_path / name
     path.write_bytes(content)
     sdk = FakeSdk()
