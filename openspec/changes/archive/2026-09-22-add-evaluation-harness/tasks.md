@@ -62,7 +62,7 @@
 ## 12. Baseline run and failure analysis (manual, real API; not part of pytest)
 
 - [x] 12.1 Run `python -m invoice_extractor.evaluate` over `ground_truth/` with `--path compare` (both ingestion paths) and a spend cap comfortably above the estimated cost (design D7); verify the run completes (`complete=True`) and commit the resulting `runs/<run_id>.json` + `.jsonl` (synthetic data only, PRD 03 R1.3)
-- [ ] 12.2 Run the same command over `ground_truth_real/`; verify the run record is written under `runs/real/` and `git status` shows it untracked
+- [x] 12.2 Run the same command over `ground_truth_real/`; verify the run record is written under `runs/real/` and `git status` shows it untracked
 - [x] 12.3 Render and commit the markdown report from the baseline run; verify it matches the PRD 03 R3 shape and the real-set section is present and separate
 - [x] 12.4 Write `docs/failure-analysis.md` from the baseline comparison output: classify every wrong field, one example each, ranked hypotheses for PRD 04 with evidence pointers (PRD 03 R6); verify every PRD 03 acceptance-criteria checkbox that names this file is satisfied by inspection
 - [x] 12.5 Replace the ESTIMATED figures in design.md D7 with the measured tokens/cost/latency from the baseline run, labelled with date and model
