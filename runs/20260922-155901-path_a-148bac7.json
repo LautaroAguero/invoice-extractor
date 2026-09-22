@@ -1,0 +1,44 @@
+{
+  "run_id": "20260922-155901-path_a-148bac7",
+  "config": {
+    "model_id": "claude-sonnet-5",
+    "prompt_version": "v1",
+    "schema_hash": "ef3fded597e7d8546741887d8bc3fe486292306a86ff058a79e3743e1d61600a",
+    "anthropic_version": "1.5.0",
+    "pydantic_version": "2.13.5",
+    "ingestion_path": "a",
+    "generator_version": {
+      "fpdf": "1.7.2",
+      "git_sha": "f7ff2e1",
+      "pdfplumber": "0.11.10",
+      "pillow": "12.3.0",
+      "pyafipws_commit": "d595b07",
+      "pypdfium2": "5.13.0"
+    },
+    "git_sha": "148bac718dbf0fdb055cb919e5db72c069dd526c",
+    "git_dirty": false,
+    "timestamp": "2026-09-22T15:59:01.994624Z",
+    "max_concurrency": 3,
+    "spend_cap_usd": "5.00",
+    "complete": true
+  },
+  "aggregates": {
+    "documents": 30,
+    "classifications": {
+      "extraction": 25,
+      "false_rejection": 0,
+      "false_acceptance": 0,
+      "correct_rejection": 5
+    },
+    "total_cost_usd": "1.128748",
+    "input_tokens": 290754,
+    "output_tokens": 54724,
+    "cache_read_input_tokens": 0,
+    "cache_creation_input_tokens": 0,
+    "latency_p50_ms": 12304,
+    "latency_p95_ms": 44411,
+    "attempts": {
+      "1": 30
+    }
+  }
+}

@@ -71,7 +71,7 @@ This change adds no new call site to the model. Both the per-document evaluation
 
 Path B (`pdfplumber` text) never calls the model itself — it produces the text content block that path A's document/image block is swapped for; the same `client.call()` is then used with `content=[{"type": "text", "text": extracted_text}]`.
 
-Expected tokens/cost/latency per document (estimated, to be replaced with measured numbers once the baseline run exists): ~1,500-3,000 input tokens for a 1-page invoice PDF (per PRD 00's verified platform facts) plus the ~600-token v1 prompt, ~200-400 output tokens for a typical `Extracted` result, so roughly $0.005-0.008/doc on `claude-sonnet-5` ($2/$10 per MTok) and 2-6s latency per call. Path B is expected to cost less per document (extracted text is smaller than a rendered PDF page) and to have a comparable or lower latency; the comparison in R5.4 replaces these estimates with measured numbers.
+**Measured** on the baseline run (2026-09-22, `claude-sonnet-5`, prompt v1, run `20260922-155901-path_a-148bac7` / `20260922-160125-path_b-148bac7`, 30 documents): path A cost $0.0376/doc mean ($1.1287 total), p50 latency 12.3s, p95 44.4s. Path B cost $0.0300/doc mean ($0.8992 total, over the 26 documents it attempted), p50 latency 13.5s, p95 42.1s. The original estimate (~$0.005-0.008/doc, 2-6s) undershot cost by roughly 5x — Sonnet 5's adaptive thinking on a page-image input costs more output tokens than the estimate assumed — and undershot latency similarly; both are now measured facts, not estimates, and PRD 04's iterations should budget against these figures, not the ones above.
 
 ### D8. Bounded concurrency and spend cap
 
