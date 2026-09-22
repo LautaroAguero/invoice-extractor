@@ -69,5 +69,5 @@
 
 ## 13. Wrap-up
 
-- [ ] 13.1 Run `pytest` with `ANTHROPIC_API_KEY` unset; verify the full suite passes with no network access
-- [ ] 13.2 Run `git status`; verify no `.env`, no `ground_truth_real/` content and no `runs/real/` content is staged, and that only the intended `runs/` baseline files and source changes are
+- [x] 13.1 Run `pytest` with `ANTHROPIC_API_KEY` unset; verify the full suite passes with no network access
+- [x] 13.2 Run `git status`; verify no `.env`, no `ground_truth_real/` content and no `runs/real/` content is staged, and that only the intended `runs/` baseline files and source changes are
