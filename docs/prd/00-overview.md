@@ -1,8 +1,8 @@
 # PRD 00 · Overview: invoice-extractor
 
-Status: draft · Last updated: 2026-09-14
+Status: draft · Last updated: 2026-09-22
 
-This is the umbrella document for the five stage PRDs. Each stage PRD says **what** has to exist and **how we know it is done**. The **how** (module layout, function signatures, prompt wording) belongs in the OpenSpec proposal and design for that stage.
+This is the umbrella document for the six stage PRDs. Each stage PRD says **what** has to exist and **how we know it is done**. The **how** (module layout, function signatures, prompt wording) belongs in the OpenSpec proposal and design for that stage.
 
 ## Problem
 
@@ -14,7 +14,7 @@ A system that takes invoice documents and returns validated, structured objects.
 
 ## Non-goals
 
-- Production deployment, multi-tenant APIs, UIs.
+- Production deployment, multi-tenant APIs, hosted or multi-user UIs. A local, single-user UI over the same pipeline is in scope as stage 6 (PRD 06, added 2026-09-22).
 - Real invoices in the measured dataset. Headline metrics run on 30 synthetic documents (see Decisions); a small separate real set exists only to sanity-check the synthetic templates and is never mixed into the numbers (PRD 02 R6, `add-synthetic-dataset`).
 - Training or fine-tuning models.
 - Integration with ARCA/AFIP web services (no CAE validation against the real registry).
@@ -28,6 +28,7 @@ A system that takes invoice documents and returns validated, structured objects.
 | 3 | [Measure and discover](03-measure-and-discover.md) | One command produces the quality report; worst field identified | ~2 h |
 | 4 | [Iterate with evidence](04-iterate-with-evidence.md) | Business validation, corrective retries, logged iterations with numbers | ~3 h |
 | 5 | [Finish](05-finish.md) | CLI, API-free tests, README, error handling | ~2 h |
+| 6 | [Local UI](06-local-ui.md) | Upload documents, see each one classified and validated, export results | ~3 h |
 
 Stages are ordered on purpose. **Nothing gets "improved" before stage 3 can measure it.**
 
