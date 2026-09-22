@@ -259,12 +259,12 @@
       ],
       "vat_breakdown": [
         {
-          "rate": "21",
-          "amount": "795858.00"
-        },
-        {
           "rate": "10.5",
           "amount": "468100.50"
+        },
+        {
+          "rate": "21",
+          "amount": "795858.00"
         }
       ],
       "other_taxes": [],
