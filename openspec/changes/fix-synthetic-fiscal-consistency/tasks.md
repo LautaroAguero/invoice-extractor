@@ -14,7 +14,7 @@
 - [x] 2.2 Copy the 13 changed documents in, and update `manifest.jsonl`: new `generator_version` on every entry, refreshed `gt_check`/`pages`, review stamps reset to null only on the 13; verify `test_regeneration.py` and `test_composition.py` pass and the manifest lists exactly 13 unreviewed entries
 - [x] 2.3 Check the new ground truth arithmetic: for every in-domain invoice, A items = net and net + VAT = total; B/C/E lines = total; C issuer is monotributo; verify with a throwaway script over `ground_truth/*.json` (output in the task note), and the extractor's `pytest` (schema validation of every ground truth) passes
   - Note: 25/25 in-domain ground truths pass (A: items = net, net + VAT = total; B/C/E: lines = total, no printed net; C issuer monotributo with null rates; others responsable inscripto). Extractor `pytest`: 314 passed with `ANTHROPIC_API_KEY` unset.
-- [ ] 2.4 **User task:** review the 13 regenerated documents with the `review` checklist command and stamp them; verify no manifest entry has a null `reviewed_by`
+- [x] 2.4 **User task:** review the 13 regenerated documents with the `review` checklist command and stamp them; verify no manifest entry has a null `reviewed_by`
 
 ## 3. Re-run the baseline (design D6; spend cap $3)
 
