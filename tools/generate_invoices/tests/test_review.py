@@ -26,7 +26,7 @@ def _dataset_with_b01(tmp_path) -> Path:
     )
     write_manifest([entry], tmp_path / "manifest.jsonl")
     params = generate_params(case.seed, tipo_cbte=6, customer_vat_condition_label="Responsable Inscripto")
-    (tmp_path / "B01.json").write_text(json.dumps(build_extracted_result(params, letter="B")), encoding="utf-8")
+    (tmp_path / "B01.json").write_text(json.dumps(build_extracted_result(params, letter="B", template_name="qr_base.csv")), encoding="utf-8")
     return tmp_path
 
 

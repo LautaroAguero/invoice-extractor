@@ -111,6 +111,22 @@ def _word_subsequence_found(haystack: str, needle: str) -> bool:
     return all(any(w == needle_word for w in haystack_words) for needle_word in needle.split())
 
 
+def _vat_breakdown_in_printed_order(invoice: dict, haystack: str) -> bool:
+    """Each "IVA <rate> <amount>" line appears after the previous one (design D4).
+
+    Found values alone do not prove order: 148bac7 had to fix 4 ground truths whose
+    lines were all printed, but listed in a different order than the document's.
+    """
+    position = -1
+    for line in invoice["vat_breakdown"]:
+        needle = f"IVA {fmt.format_vat_rate(line['rate'])} {fmt.format_amount(line['amount'])}"
+        found = haystack.find(needle, position + 1)
+        if found == -1:
+            return False
+        position = found
+    return True
+
+
 def verify_invoice(invoice: dict, pdf_text: str) -> VerificationResult:
     haystack = fmt.collapse_whitespace(pdf_text)
     checks = iter_checks(invoice)
@@ -128,6 +144,9 @@ def verify_invoice(invoice: dict, pdf_text: str) -> VerificationResult:
         if not found:
             failed_field = check.path
             break
+    # Order is a property of the list, not a field: it fails generation but is not counted.
+    if failed_field is None and not _vat_breakdown_in_printed_order(invoice, haystack):
+        failed_field = "vat_breakdown"
 
     return VerificationResult(
         passed=failed_field is None,

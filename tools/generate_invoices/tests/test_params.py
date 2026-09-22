@@ -55,8 +55,50 @@ def test_consumidor_final_unidentified_has_no_customer_party():
 
 def test_foreign_currency_items_have_no_vat():
     p = generate_params(1001, tipo_cbte=19, currency="USD", exchange_rate=Decimal("875.0000"))
-    assert all(it.vat_rate == Decimal("0") for it in p.items)
+    assert all(it.vat_rate is None for it in p.items)
     assert p.vat_amount == Decimal("0.00")
+    assert p.total == sum((it.line_amount for it in p.items), Decimal("0.00"))
+
+
+def test_factura_b_lines_include_vat_exactly():
+    for seed in range(1001, 1051):
+        p = generate_params(seed, tipo_cbte=6)
+        for it in p.items:
+            assert it.vat_rate is not None
+            assert it.net_amount + it.vat_amount == it.line_amount
+        assert p.total == sum((it.line_amount for it in p.items), Decimal("0.00"))
+        assert p.net_amount + p.vat_amount == p.total
+        assert sum((base for _, base, _ in p.vat_breakdown), Decimal("0.00")) == p.net_amount
+
+
+def test_factura_b_vat_is_the_rate_share_of_the_line():
+    p = generate_params(1001, tipo_cbte=6)
+    for it in p.items:
+        expected_net = it.line_amount / (1 + it.vat_rate / Decimal(100))
+        assert abs(it.net_amount - expected_net) <= Decimal("0.005")
+
+
+def test_nota_de_debito_b_prices_like_a_factura_b():
+    p = generate_params(1001, tipo_cbte=7)
+    assert all(it.vat_included for it in p.items)
+    assert p.total == sum((it.line_amount for it in p.items), Decimal("0.00"))
+
+
+def test_factura_c_has_no_vat():
+    p = generate_params(1001, tipo_cbte=11)
+    assert all(it.vat_rate is None for it in p.items)
+    assert p.vat_amount == Decimal("0.00")
+    assert p.vat_breakdown == []
+    assert p.total == sum((it.line_amount for it in p.items), Decimal("0.00"))
+
+
+def test_pricing_keeps_the_random_sequence():
+    # Same seed, different letter: the drawn quantities, prices and CAE are the same.
+    a, b, c = (generate_params(1001, tipo_cbte=t) for t in (1, 6, 11))
+    drawn = [(it.quantity, it.unit_price) for it in a.items]
+    assert drawn == [(it.quantity, it.unit_price) for it in b.items]
+    assert drawn == [(it.quantity, it.unit_price) for it in c.items]
+    assert a.cae == b.cae == c.cae
 
 
 def test_long_description_item_is_marked():

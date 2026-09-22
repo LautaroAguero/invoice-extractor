@@ -58,7 +58,7 @@ def _case_params(case: Case):
 
 def generate_invoice_document(case: Case, out_dir: Path) -> dict:
     params = _case_params(case)
-    invoice_gt = build_invoice_ground_truth(params, letter=case.letter)
+    invoice_gt = build_invoice_ground_truth(params, letter=case.letter, template_name=case.template_name)
 
     if case.degradation is None:
         result = generate_document(

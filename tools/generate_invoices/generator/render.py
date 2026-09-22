@@ -18,7 +18,7 @@ if not hasattr(inspect, "getargspec"):
 
 from pyafipws.pyfepdf import FEPDF  # noqa: E402
 
-from .params import InvoiceParams
+from .params import InvoiceParams, issuer_vat_condition_label
 from .reproducibility import pinned_creation_date
 
 HERE = Path(__file__).resolve().parent.parent
@@ -95,7 +95,7 @@ def render_invoice(
         if not it.vat_rate:
             continue
         base, amt = net_by_rate.get(it.vat_rate, (Decimal("0.00"), Decimal("0.00")))
-        net_by_rate[it.vat_rate] = (base + it.line_amount, amt + it.vat_amount)
+        net_by_rate[it.vat_rate] = (base + it.net_amount, amt + it.vat_amount)
 
     fepdf.CrearFactura(
         concepto=params.concepto,
@@ -151,7 +151,7 @@ def render_invoice(
         "MEMBRETE2": "",
         "CUIT": f"CUIT {issuer.cuit[:2]}-{issuer.cuit[2:10]}-{issuer.cuit[10]}",
         "IIBB": f"IIBB {issuer.cuit}",
-        "IVA": "IVA Responsable Inscripto",
+        "IVA": f"IVA {issuer_vat_condition_label(params.tipo_cbte)}",
         "INICIO": "Inicio de Actividad: 01/03/2015",
     }.items():
         fepdf.AgregarDato(k, v)

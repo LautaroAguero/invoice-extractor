@@ -8,15 +8,53 @@ input. Every value here is shaped exactly like the extractor's `ExtractionResult
 
 from __future__ import annotations
 
+import csv
 from decimal import Decimal
+from functools import cache
+from pathlib import Path
 from typing import Any
 
 from .params import (
-    ISSUER_VAT_CONDITION_ENUM,
     VAT_CONDITION_ENUM_BY_LABEL,
     InvoiceParams,
     is_consumidor_final,
+    issuer_vat_condition_label,
 )
+
+
+TEMPLATES_DIR = Path(__file__).resolve().parent.parent / "templates"
+
+
+class UnprintableVatRateError(ValueError):
+    """A VAT rate has no `IVA<rate>` field in the template, so it cannot be printed."""
+
+
+@cache
+def _vat_line_positions(template_name: str) -> dict[Decimal, tuple[float, float]]:
+    """(y, x) of each `IVA<rate>` totals field in a pyfepdf template CSV, keyed by rate.
+
+    pyfepdf prints each VAT line at its template field, not in insertion order, so this
+    is the printed order of `vat_breakdown` (design D3).
+    """
+    positions: dict[Decimal, tuple[float, float]] = {}
+    with (TEMPLATES_DIR / template_name).open(encoding="latin-1", newline="") as handle:
+        for row in csv.reader(handle, delimiter=";", quotechar="'"):
+            name = row[0]
+            if name.startswith("IVA") and not name.endswith(".L"):
+                try:
+                    rate = Decimal(name[3:])
+                except ArithmeticError:
+                    continue
+                positions[rate] = (float(row[3]), float(row[2]))
+    return positions
+
+
+def printed_vat_order(rates: list[Decimal], template_name: str) -> list[Decimal]:
+    positions = _vat_line_positions(template_name)
+    missing = [rate for rate in rates if rate not in positions]
+    if missing:
+        raise UnprintableVatRateError(f"{template_name} has no IVA field for rate(s) {missing}")
+    return sorted(rates, key=lambda rate: positions[rate])
 
 
 def _dec(value: Decimal) -> str:
@@ -28,7 +66,7 @@ def document_code(tipo_cbte: int) -> str:
     return "%02d" % tipo_cbte
 
 
-def build_invoice_ground_truth(params: InvoiceParams, *, letter: str) -> dict[str, Any]:
+def build_invoice_ground_truth(params: InvoiceParams, *, letter: str, template_name: str) -> dict[str, Any]:
     """The `invoice` object of an `Extracted` result for one in-domain document."""
     show_neto = letter in ("A", "M")
     show_vat_breakdown = letter in ("A", "M")
@@ -49,11 +87,13 @@ def build_invoice_ground_truth(params: InvoiceParams, *, letter: str) -> dict[st
         for it in params.items
     ]
 
-    vat_breakdown = (
-        [{"rate": _dec(rate), "amount": _dec(amount)} for rate, _base, amount in params.vat_breakdown]
-        if show_vat_breakdown
-        else []
-    )
+    vat_breakdown: list[dict[str, str]] = []
+    if show_vat_breakdown:
+        amount_by_rate = {rate: amount for rate, _base, amount in params.vat_breakdown}
+        vat_breakdown = [
+            {"rate": _dec(rate), "amount": _dec(amount_by_rate[rate])}
+            for rate in printed_vat_order(list(amount_by_rate), template_name)
+        ]
 
     if params.customer is None:
         customer = {"name": None, "cuit": None, "address": None}
@@ -75,7 +115,7 @@ def build_invoice_ground_truth(params: InvoiceParams, *, letter: str) -> dict[st
         "issuer": {
             "name": params.issuer.name,
             "cuit": params.issuer.cuit,
-            "vat_condition": ISSUER_VAT_CONDITION_ENUM,
+            "vat_condition": VAT_CONDITION_ENUM_BY_LABEL[issuer_vat_condition_label(params.tipo_cbte)],
         },
         "customer": customer,
         "currency": params.currency,
@@ -92,8 +132,9 @@ def build_invoice_ground_truth(params: InvoiceParams, *, letter: str) -> dict[st
     }
 
 
-def build_extracted_result(params: InvoiceParams, *, letter: str) -> dict[str, Any]:
-    return {"result": {"outcome": "extracted", "invoice": build_invoice_ground_truth(params, letter=letter)}}
+def build_extracted_result(params: InvoiceParams, *, letter: str, template_name: str) -> dict[str, Any]:
+    invoice = build_invoice_ground_truth(params, letter=letter, template_name=template_name)
+    return {"result": {"outcome": "extracted", "invoice": invoice}}
 
 
 def build_failed_result(*, reason: str, detail: str) -> dict[str, Any]:

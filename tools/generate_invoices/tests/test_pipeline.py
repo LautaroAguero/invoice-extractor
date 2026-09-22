@@ -9,7 +9,7 @@ from generator.visibility import build_invoice_ground_truth
 
 def test_success_writes_pdf_and_ground_truth(tmp_path):
     p = generate_params(3001, tipo_cbte=1, n_items=2)
-    invoice_gt = build_invoice_ground_truth(p, letter="A")
+    invoice_gt = build_invoice_ground_truth(p, letter="A", template_name="qr_base.csv")
 
     result = generate_document(
         doc_id="doc_a",
@@ -26,7 +26,7 @@ def test_success_writes_pdf_and_ground_truth(tmp_path):
 
 def test_rendering_error_writes_nothing(tmp_path):
     p = generate_params(3002, tipo_cbte=1, n_items=1)
-    invoice_gt = build_invoice_ground_truth(p, letter="A")
+    invoice_gt = build_invoice_ground_truth(p, letter="A", template_name="qr_base.csv")
     manifest_entries = []
 
     with pytest.raises(GenerationError):
@@ -45,7 +45,7 @@ def test_rendering_error_writes_nothing(tmp_path):
 
 def test_verification_failure_writes_nothing(tmp_path):
     p = generate_params(3003, tipo_cbte=1, n_items=1)
-    invoice_gt = build_invoice_ground_truth(p, letter="A")
+    invoice_gt = build_invoice_ground_truth(p, letter="A", template_name="qr_base.csv")
     tampered = copy.deepcopy(invoice_gt)
     tampered["total"] = "999999.99"
     manifest_entries = []

@@ -10,7 +10,8 @@ from __future__ import annotations
 import random
 from dataclasses import dataclass
 from datetime import date, timedelta
-from decimal import Decimal
+from decimal import ROUND_HALF_UP, Decimal
+from typing import Literal
 
 from .identifiers import generate_cae, generate_cuit
 
@@ -39,11 +40,23 @@ CUSTOMER_NAMES = [
 
 VAT_RATES = (Decimal("21"), Decimal("10.5"))
 
+# How a letter prices its items (design D1/D2 of fix-synthetic-fiscal-consistency):
+# "net"   (A): printed prices exclude VAT; VAT is added and discriminated.
+# "gross" (B): printed prices include VAT; lines sum to the total, VAT is not printed.
+# "none"  (C, E): no VAT at all; lines sum to the total.
+Pricing = Literal["net", "gross", "none"]
+PRICING_BY_TIPO_CBTE: dict[int, Pricing] = {6: "gross", 7: "gross", 11: "none", 19: "none"}
+
+
+def pricing_for(tipo_cbte: int) -> Pricing:
+    """Letters not listed (A and the non-invoice negatives) keep net pricing."""
+    return PRICING_BY_TIPO_CBTE.get(tipo_cbte, "net")
+
 ISSUER_NAME = "Tecnored Patagonia S.A."
 ISSUER_ADDRESS = "Belgrano 455, Neuquen"
 ISSUER_PHONE = "Tel. 0299 444-1234"
-ISSUER_VAT_CONDITION_LABEL = "Responsable Inscripto"
-ISSUER_VAT_CONDITION_ENUM = "responsable_inscripto"
+# A Factura C is issued by a monotributista; every other letter here by a Responsable Inscripto.
+_ISSUER_VAT_CONDITION_LABEL_BY_TIPO_CBTE = {11: "Responsable Monotributo"}
 
 # Printed customer VAT-condition labels this generator uses, mapped to the
 # extractor's VatCondition enum (src/invoice_extractor/schema.py). Extend only
@@ -54,6 +67,11 @@ VAT_CONDITION_ENUM_BY_LABEL = {
     "Responsable Monotributo": "responsable_monotributo",
     "IVA Sujeto Exento": "sujeto_exento",
 }
+
+
+def issuer_vat_condition_label(tipo_cbte: int) -> str:
+    """The issuer's printed VAT condition, shared by the renderer and the ground truth."""
+    return _ISSUER_VAT_CONDITION_LABEL_BY_TIPO_CBTE.get(tipo_cbte, "Responsable Inscripto")
 
 
 def is_consumidor_final(vat_condition_label: str) -> bool:
@@ -71,16 +89,32 @@ class Item:
     unit_price: Decimal
     vat_rate: Decimal | None
     discount: Decimal = Decimal("0.00")
+    # True on a Factura B: `unit_price` and `line_amount` are the printed, VAT-included values.
+    vat_included: bool = False
 
     @property
     def line_amount(self) -> Decimal:
+        """The printed "Importe" of the row: net on A, VAT-included on B, VAT-free on C/E."""
         return (self.quantity * self.unit_price - self.discount).quantize(CENT)
+
+    @property
+    def net_amount(self) -> Decimal:
+        if self.vat_included and self.vat_rate:
+            return (self.line_amount / (1 + self.vat_rate / Decimal(100))).quantize(CENT, ROUND_HALF_UP)
+        return self.line_amount
 
     @property
     def vat_amount(self) -> Decimal:
         if not self.vat_rate:
             return Decimal("0.00")
+        if self.vat_included:
+            # The remainder, so net + VAT equals the printed line exactly.
+            return self.line_amount - self.net_amount
         return (self.line_amount * self.vat_rate / Decimal(100)).quantize(CENT)
+
+    @property
+    def gross_amount(self) -> Decimal:
+        return self.net_amount + self.vat_amount
 
 
 @dataclass
@@ -110,7 +144,7 @@ class InvoiceParams:
 
     @property
     def net_amount(self) -> Decimal:
-        return sum((it.line_amount for it in self.items), Decimal("0.00"))
+        return sum((it.net_amount for it in self.items), Decimal("0.00"))
 
     @property
     def vat_amount(self) -> Decimal:
@@ -132,7 +166,7 @@ class InvoiceParams:
                 order.append(it.vat_rate)
                 totals[it.vat_rate] = (Decimal("0.00"), Decimal("0.00"))
             base, amt = totals[it.vat_rate]
-            totals[it.vat_rate] = (base + it.line_amount, amt + it.vat_amount)
+            totals[it.vat_rate] = (base + it.net_amount, amt + it.vat_amount)
         return [(rate, *totals[rate]) for rate in order]
 
 
@@ -153,6 +187,7 @@ def generate_params(
 ) -> InvoiceParams:
     """Deterministic invoice parameters for one case: same seed -> equal parameters."""
     rng = random.Random(seed)
+    pricing = pricing_for(tipo_cbte)
 
     issue_date = issue_date or (date(2026, 1, 5) + timedelta(days=rng.randint(0, 250)))
     due_date = None if concepto == 1 else issue_date + timedelta(days=30)
@@ -176,14 +211,22 @@ def generate_params(
         # every amount-like value prints with exactly 2 decimals, e.g. "1,00" not "1".
         qty = Decimal(rng.randint(1, 5)).quantize(CENT)
         unit_price = Decimal(rng.randint(500, 1500) * 100).quantize(CENT)
+        # Always drawn, so every letter consumes the same random sequence (design D1/D2).
         rate = rng.choice(VAT_RATES) if currency == "ARS" else Decimal("0")
+        if pricing == "none":
+            rate = None
         if long_description_item == i:
             desc = (
                 f"{desc} - descripcion extendida para verificar el ajuste de texto en la "
                 "columna de descripcion cuando el contenido supera ampliamente el ancho "
                 "disponible de la celda en el detalle del comprobante"
             )
-        items.append(Item(code=code, description=desc, quantity=qty, unit_price=unit_price, vat_rate=rate))
+        items.append(
+            Item(
+                code=code, description=desc, quantity=qty, unit_price=unit_price, vat_rate=rate,
+                vat_included=pricing == "gross",
+            )
+        )
 
     resolved_cbte_nro = cbte_nro if cbte_nro is not None else rng.randint(1, 9999)
 
