@@ -38,7 +38,8 @@ ABOUT = (
 
 
 def _prompt_versions() -> list[str]:
-    versions = sorted((p.stem for p in PROMPTS_DIR.glob("v*.md")), key=lambda v: int(v[1:]), reverse=True)
+    # Oldest first, so the page's default is the baseline the CLI also defaults to.
+    versions = sorted((p.stem for p in PROMPTS_DIR.glob("v*.md")), key=lambda v: int(v[1:]))
     return versions or ["v1"]
 
 
